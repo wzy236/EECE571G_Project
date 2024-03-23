@@ -43,9 +43,11 @@ contract TrustableFund {
     modifier checkUniqueFunderaise() {
         //check if user only have one active funderaise
         uint length=fundRecords[msg.sender].length;
-        uint latestID=fundRecords[msg.sender][length-1];
+        uint latestID;
+        if (length != 0)
+            latestID = fundRecords[msg.sender][length-1];
 
-        require(fundList[latestID].active == false,"You already have one openning Fundraise");
+        require(length == 0|| fundList[latestID].active == false,"You already have one openning Fundraise");
         _;
     }
 
@@ -101,7 +103,7 @@ contract TrustableFund {
             uint _fundID,
             string memory _time
         ) public payable{
-        // Create a new Fundraise struct and push it to the fundList
+        // Create a new DonationHistory struct and push it to the fundList
         require(fundList[_fundID].active==true, "fundraise is not active");
 
         // get the current total DonationList
