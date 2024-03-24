@@ -37,7 +37,7 @@ describe("TrustableFund Contract", function () {
         "Test Fundraise Title", 
         "Test Fundraise Story Text", 
         "The image should be in the format of base64",
-        Math.floor(Date.now()) + 86400 * 1000   // assume timestamp is in the milliseconds 
+        Math.floor(Date.now() / 1000) + 86400    // timestamp is in seconds
                                               // set ddl 1 day after the creating time for testing
       );
       const newFundCount = (await TrustableFundTestCase.getFundList())[0].length;
@@ -68,8 +68,8 @@ describe("TrustableFund Contract", function () {
             "First Test Fundraise Title", 
             "First Test Fundraise Story Text", 
             "Image String",
-            Math.floor(Date.now()) + 86400 * 1000   // set ddl 1 day after the creating time for testing
-                                                  
+            Math.floor(Date.now() / 1000) + 86400    // timestamp is in seconds
+                                                     // set ddl 1 day after the creating time for testing
           );
           
           // Try to create the second fundraise with the same user
@@ -79,7 +79,8 @@ describe("TrustableFund Contract", function () {
               "Second Fundraise", 
               "Second Test Fundraise Story Text", 
               "Image String",
-              Math.floor(Date.now() / 1000) + 86400 * 2 * 1000// set ddl 2 day after the creating time for testing
+              Math.floor(Date.now() / 1000) + 86400 * 2 // timestamp is in seconds
+                                                        // set ddl 2 day after the creating time for testing
             )
           ).to.be.revertedWith("You already have one openning Fundraise");
         
@@ -106,7 +107,7 @@ describe("TrustableFund Contract", function () {
         "Test Fundraise Title",
         "Test Fundraise Story Text",
         "The image should be in the format of base64",
-        Math.floor(Date.now()) + 86400 * 1000   // assume timestamp is in the milliseconds 
+        Math.floor(Date.now() / 1000) + 86400    // timestamp is in seconds
                                                 // set ddl 1 day after the creating time for testing
       );
 
@@ -149,7 +150,7 @@ describe("Withdraw from a fundraise", function () {
       "Test Fundraise Title",
       "Test Fundraise Story Text",
       "The image should be in the format of base64",
-      Math.floor(Date.now()) + 86400 * 1000   // assume timestamp is in the milliseconds 
+      Math.floor(Date.now() / 1000) + 86400    // timestamp is in seconds
                                               // set ddl 1 day after the creating time for testing
     );
 
@@ -187,10 +188,53 @@ describe("Withdraw from a fundraise", function () {
   });
 
   it("Should allow the onwer to widthdraw once deadline passed", async function () {
-    // TODO
+    const { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(deployTokenFixture);
+
+    // Addr1 create a new fundraise
+    await TrustableFundTestCase.connect(addr1).publishFundraise(
+      ethers.parseEther('100'),
+      "Test Fundraise Title",
+      "Test Fundraise Story Text",
+      "The image should be in the format of base64",
+      Math.floor(Date.now() / 1000) + 86400    // timestamp is in seconds
+                                              // set ddl 1 day after the creating time for testing
+    );
+
+    const fundId = (await TrustableFundTestCase.getFundList())[0].length - 1;
+
+    // Addr2 donates to the fundraise created by addr1, but not enough to meet the goal
+    const donationAmount = ethers.parseEther('10');
+    await TrustableFundTestCase.connect(addr2).donation(
+      fundId,
+      "2024-01-01T12:00:00Z",
+      { value: donationAmount}
+    );
+
     // Advance time to just past the deadline
-    await ethers.provider.send("evm_increaseTime", [86400 * 1000 + 1]);
+    await ethers.provider.send("evm_increaseTime", [86400 + 1]);
     await ethers.provider.send("evm_mine", []);
+
+    // Check balances before withdrawal
+    const addr1BalanceBefore = await ethers.provider.getBalance(addr1.address);
+    const contractBalanceBefore = await ethers.provider.getBalance(TrustableFundTestCase.getAddress());
+
+    // Addr1 withdraws the funds    
+    const tx = await TrustableFundTestCase.connect(addr1).withdrawFundraise();
+    const receipt = await tx.wait();
+    const gasUsed = receipt.gasUsed * receipt.gasPrice;
+
+    // Check balances after withdrawal
+    const addr1BalanceAfter = await ethers.provider.getBalance(addr1.address);
+    const contractBalanceAfter = await ethers.provider.getBalance(TrustableFundTestCase.getAddress());
+
+    // Check if the contract balance is reduced by the donation amount
+    expect(contractBalanceBefore - contractBalanceAfter).to.equal(donationAmount);
+    // Check if addr1's balance has increased by the donation amount - gas costs
+    expect(addr1BalanceAfter - addr1BalanceBefore).to.equal(donationAmount - gasUsed);
+
+    // Check if the fundraise is inactive after withdrawal
+    const fundraise = (await TrustableFundTestCase.getFundList())[0].find(f => f.fundID === BigInt(fundId));
+    expect(fundraise.active).to.equal(false);
   });
 });
 
