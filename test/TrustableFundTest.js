@@ -141,7 +141,7 @@ describe("TrustableFund Contract", function () {
 });
 
 describe("Withdraw from a fundraise", function () {
-  it("Should allow the owner to withdraw once goal has reached", async function () {
+  it("Should allow the fundraiser to withdraw once goal has reached", async function () {
     const { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(deployTokenFixture);
 
     // Addr1 create a new fundraise
@@ -166,6 +166,7 @@ describe("Withdraw from a fundraise", function () {
 
     // Check balances before withdrawal
     const addr1BalanceBefore = await ethers.provider.getBalance(addr1.address);
+    const addr2BalanceBefore = await ethers.provider.getBalance(addr2.address);
     const contractBalanceBefore = await ethers.provider.getBalance(TrustableFundTestCase.getAddress());
 
     // Addr1 withdraws the funds    
@@ -175,19 +176,22 @@ describe("Withdraw from a fundraise", function () {
 
     // Check balances after withdrawal
     const addr1BalanceAfter = await ethers.provider.getBalance(addr1.address);
+    const addr2BalanceAfter = await ethers.provider.getBalance(addr2.address);
     const contractBalanceAfter = await ethers.provider.getBalance(TrustableFundTestCase.getAddress());
 
     // Check if the contract balance is reduced by the donation amount
     expect(contractBalanceBefore - contractBalanceAfter).to.equal(donationAmount);
     // Check if addr1's balance has increased by the donation amount - gas costs
     expect(addr1BalanceAfter - addr1BalanceBefore).to.equal(donationAmount - gasUsed);
+    // Check if addr2's balance reamins unchanged before and after addr1's withdrawal
+    expect(addr2BalanceAfter).to.equal(addr2BalanceBefore);
 
     // Check if the fundraise is inactive after withdrawal
     const fundraise = (await TrustableFundTestCase.getFundList())[0].find(f => f.fundID === BigInt(fundId));
     expect(fundraise.active).to.equal(false);
   });
 
-  it("Should allow the onwer to widthdraw once deadline passed", async function () {
+  it("Should allow the fundraiser to widthdraw once deadline passed", async function () {
     const { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(deployTokenFixture);
 
     // Addr1 create a new fundraise
@@ -216,6 +220,7 @@ describe("Withdraw from a fundraise", function () {
 
     // Check balances before withdrawal
     const addr1BalanceBefore = await ethers.provider.getBalance(addr1.address);
+    const addr2BalanceBefore = await ethers.provider.getBalance(addr2.address);
     const contractBalanceBefore = await ethers.provider.getBalance(TrustableFundTestCase.getAddress());
 
     // Addr1 withdraws the funds    
@@ -225,15 +230,146 @@ describe("Withdraw from a fundraise", function () {
 
     // Check balances after withdrawal
     const addr1BalanceAfter = await ethers.provider.getBalance(addr1.address);
+    const addr2BalanceAfter = await ethers.provider.getBalance(addr2.address);
     const contractBalanceAfter = await ethers.provider.getBalance(TrustableFundTestCase.getAddress());
 
     // Check if the contract balance is reduced by the donation amount
     expect(contractBalanceBefore - contractBalanceAfter).to.equal(donationAmount);
     // Check if addr1's balance has increased by the donation amount - gas costs
     expect(addr1BalanceAfter - addr1BalanceBefore).to.equal(donationAmount - gasUsed);
+    // Check if addr2's balance reamins unchanged before and after addr1's withdrawal
+    expect(addr2BalanceAfter).to.equal(addr2BalanceBefore);
 
     // Check if the fundraise is inactive after withdrawal
     const fundraise = (await TrustableFundTestCase.getFundList())[0].find(f => f.fundID === BigInt(fundId));
+    expect(fundraise.active).to.equal(false);
+  });
+
+  it("Shouldn't allow the fundraiser to withdraw when goal hasn't reached and deadline hasn't passed", async function () {
+    const { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(deployTokenFixture);
+
+    // Addr1 create a new fundraise
+    await TrustableFundTestCase.connect(addr1).publishFundraise(
+      ethers.parseEther('100'),
+      "Test Fundraise Title",
+      "Test Fundraise Story Text",
+      "The image should be in the format of base64",
+      Math.floor(Date.now() / 1000) + 86400    // timestamp is in seconds
+                                              // set ddl 1 day after the creating time for testing
+    );
+
+    const fundId = (await TrustableFundTestCase.getFundList())[0].length - 1;
+
+    // Addr2 donates to the fundraise created by addr1, but not enough to meet the goal
+    const donationAmount = ethers.parseEther('10');
+    await TrustableFundTestCase.connect(addr2).donation(
+      fundId,
+      "2024-01-01T12:00:00Z",
+      { value: donationAmount}
+    );
+
+    // Check balances before withdrawal
+    const addr1BalanceBefore = await ethers.provider.getBalance(addr1.address);
+    const addr2BalanceBefore = await ethers.provider.getBalance(addr2.address);
+    const contractBalanceBefore = await ethers.provider.getBalance(TrustableFundTestCase.getAddress());
+
+    // Addr1 try to withdraws the funds, should fail
+    await expect(
+      TrustableFundTestCase.connect(addr1).withdrawFundraise()
+    ).to.be.revertedWith("The deadline haven't passed and the goal hasn't been reached");
+
+    // Check balances after withdrawal
+    const addr1BalanceAfter = await ethers.provider.getBalance(addr1.address);
+    const addr2BalanceAfter = await ethers.provider.getBalance(addr2.address);
+    const contractBalanceAfter = await ethers.provider.getBalance(TrustableFundTestCase.getAddress());
+
+    // Check if the contract balance reamins unchanged before and after the failed withdrawal
+    expect(contractBalanceAfter).to.equal(contractBalanceBefore);
+    // We don't know the exact gas cost for a failed transaction. But Addr1's balance should decrease because of the gas cost.
+    expect(addr1BalanceAfter).to.be.lessThan(addr1BalanceBefore);
+    // Check if addr2's balance reamins unchanged before and after Addr1's failed withdrawal
+    expect(addr2BalanceAfter).to.equal(addr2BalanceBefore);
+
+    // Check if the fundraise is still active after the failed withdrawal
+    const fundraise = (await TrustableFundTestCase.getFundList())[0].find(f => f.fundID === BigInt(fundId));
+    expect(fundraise.active).to.equal(true);
+  });
+
+  it("Shouldn't allow non-fundraisers to withdraw funds", async function () {
+    const { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(deployTokenFixture);
+
+    // Addr1 create a new fundraise
+    await TrustableFundTestCase.connect(addr1).publishFundraise(
+      ethers.parseEther('100'),
+      "Test Fundraise Title",
+      "Test Fundraise Story Text",
+      "The image should be in the format of base64",
+      Math.floor(Date.now() / 1000) + 86400    // timestamp is in seconds
+                                              // set ddl 1 day after the creating time for testing
+    );
+
+    const fundId = (await TrustableFundTestCase.getFundList())[0].length - 1;
+
+    // Addr2 donates to the fundraise created by addr1, meeting the goal
+    const donationAmount = ethers.parseEther('100');
+    await TrustableFundTestCase.connect(addr2).donation(
+      fundId,
+      "2024-01-01T12:00:00Z",
+      { value: donationAmount}
+    );
+
+    // Step 1: Addr2 try to withdraw the funds, should fail since addr2 is not the fundraiser
+    // Check balances before withdrawal
+    let addr1BalanceBefore = await ethers.provider.getBalance(addr1.address);
+    let addr2BalanceBefore = await ethers.provider.getBalance(addr2.address);
+    let contractBalanceBefore = await ethers.provider.getBalance(TrustableFundTestCase.getAddress());
+
+    // Addr2 try to withdraws the funds, should fail because addr2 is not the fundraiser
+    await expect(
+      TrustableFundTestCase.connect(addr2).withdrawFundraise()
+    ).to.be.reverted;
+
+    // Check balances after withdrawal
+    let addr1BalanceAfter = await ethers.provider.getBalance(addr1.address);
+    let addr2BalanceAfter = await ethers.provider.getBalance(addr2.address);
+    let contractBalanceAfter = await ethers.provider.getBalance(TrustableFundTestCase.getAddress());
+
+    // Check if the contract balance reamins unchanged before and after the failed withdrawal
+    expect(contractBalanceAfter).to.equal(contractBalanceBefore);
+    // Check if the contract balance reamins unchanged before and after the failed withdrawal
+    expect(addr1BalanceAfter).to.equal(addr1BalanceBefore);
+    // We don't know the exact gas cost for a failed transaction. But Addr2's balance should decrease because of the gas cost.
+    expect(addr2BalanceAfter).to.be.lessThan(addr2BalanceBefore);
+    
+    // Check if the fundraise is still active after the failed withdrawal
+    let fundraise = (await TrustableFundTestCase.getFundList())[0].find(f => f.fundID === BigInt(fundId));
+    expect(fundraise.active).to.equal(true);
+
+    // Step 2: Addr1 try to withdraw the funds, should succeed since addr1 is the fundraiser
+    // Check balances before withdrawal
+    addr1BalanceBefore = await ethers.provider.getBalance(addr1.address);
+    addr2BalanceBefore = await ethers.provider.getBalance(addr2.address);
+    contractBalanceBefore = await ethers.provider.getBalance(TrustableFundTestCase.getAddress());
+
+    // Addr1 withdraws the funds    
+    tx = await TrustableFundTestCase.connect(addr1).withdrawFundraise();
+    receipt = await tx.wait();
+    gasUsed = receipt.gasUsed * receipt.gasPrice;
+
+    // Check balances after withdrawal
+    addr1BalanceAfter = await ethers.provider.getBalance(addr1.address);
+    addr2BalanceAfter = await ethers.provider.getBalance(addr2.address);
+    contractBalanceAfter = await ethers.provider.getBalance(TrustableFundTestCase.getAddress());
+
+    // Check if the contract balance is reduced by the donation amount
+    expect(contractBalanceBefore - contractBalanceAfter).to.equal(donationAmount);
+    // Check if addr1's balance has increased by the donation amount - gas costs
+    expect(addr1BalanceAfter - addr1BalanceBefore).to.equal(donationAmount - gasUsed);
+    // Check if addr2's balance reamins unchanged before and after addr1's withdrawal
+    expect(addr2BalanceAfter).to.equal(addr2BalanceBefore);
+
+    // Check if the fundraise is inactive after withdrawal
+    fundraise = (await TrustableFundTestCase.getFundList())[0].find(f => f.fundID === BigInt(fundId));
     expect(fundraise.active).to.equal(false);
   });
 });
