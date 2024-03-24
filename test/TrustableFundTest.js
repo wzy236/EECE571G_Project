@@ -1,5 +1,5 @@
 const { expect } = require("chai");
-const { ethers } = require("hardhat");
+const { ethers, upgrades } = require("hardhat");
 
 
 const {
@@ -14,8 +14,8 @@ describe("TrustableFund Contract", function() {
         // To deploy our contract, we just have to call ethers.deployContract and await
         // its waitForDeployment() method, which happens once its transaction has been
         // mined.
-        const TrustableFundTestCase = await ethers.deployContract("TrustableFund");
-
+        const Fund = await ethers.getContractFactory("TrustableFund");
+        let TrustableFundTestCase = await upgrades.deployProxy(Fund);
         await TrustableFundTestCase.waitForDeployment();
 
         // Fixtures can return anything you consider useful for your tests
@@ -25,7 +25,7 @@ describe("TrustableFund Contract", function() {
 
     describe("Create a fundraise", function() {
         it("Should successfully publish a fundraise", async function() {
-            const { TrustableFundTestCase, addr0 } = await loadFixture(
+            let { TrustableFundTestCase, addr0 } = await loadFixture(
                 deployTokenFixture
             );
 
@@ -57,7 +57,7 @@ describe("TrustableFund Contract", function() {
         });
 
         it("Shouldn't create a new fundraise for the user who has one in the progress", async function() {
-            const { TrustableFundTestCase, addr0 } = await loadFixture(
+            let { TrustableFundTestCase, addr0 } = await loadFixture(
                 deployTokenFixture
             );
             const initialFundCount = (await TrustableFundTestCase.getFundList())[0].length;
@@ -97,7 +97,7 @@ describe("TrustableFund Contract", function() {
 
     describe("Donate to a fundraise", function() {
         it("Should successfully donate to a fundraise", async function() {
-            const { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(
+            let { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(
                 deployTokenFixture
             );
 
@@ -140,7 +140,7 @@ describe("TrustableFund Contract", function() {
         });
 
         it("Shouldn't donate to a fundraise that is cancelled", async function() {
-            const { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(deployTokenFixture);
+            let { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(deployTokenFixture);
             
             // Step 1: Create a cancelled fundraise
             // Addr0 create a new fundraise
@@ -220,7 +220,7 @@ describe("TrustableFund Contract", function() {
 
     describe("Withdraw from a fundraise", function() {
         it("Should allow the fundraiser to withdraw once goal has reached", async function() {
-            const { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(deployTokenFixture);
+            let { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(deployTokenFixture);
 
             // Addr1 create a new fundraise
             await TrustableFundTestCase.connect(addr1).publishFundraise(
@@ -269,7 +269,7 @@ describe("TrustableFund Contract", function() {
         });
 
         it("Should allow the fundraiser to widthdraw once deadline passed", async function() {
-            const { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(deployTokenFixture);
+            let { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(deployTokenFixture);
 
             // Addr1 create a new fundraise
             await TrustableFundTestCase.connect(addr1).publishFundraise(
@@ -322,7 +322,7 @@ describe("TrustableFund Contract", function() {
         });
 
         it("Shouldn't allow the fundraiser to withdraw when goal hasn't reached and deadline hasn't passed", async function() {
-            const { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(deployTokenFixture);
+            let { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(deployTokenFixture);
 
             // Addr1 create a new fundraise
             await TrustableFundTestCase.connect(addr1).publishFundraise(
@@ -371,7 +371,7 @@ describe("TrustableFund Contract", function() {
         });
 
         it("Shouldn't allow non-fundraisers to withdraw funds", async function() {
-            const { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(deployTokenFixture);
+            let { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(deployTokenFixture);
 
             // Addr1 create a new fundraise
             await TrustableFundTestCase.connect(addr1).publishFundraise(
@@ -450,7 +450,7 @@ describe("TrustableFund Contract", function() {
 
     describe("Cancel a existed fundraise", function() {
         it("Shouldn't allow the fundraiser to cancel once fundraise is closed/inactive", async function() {
-            const { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(deployTokenFixture);
+            let { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(deployTokenFixture);
 
             // Addr0 create a new fundraise
             await TrustableFundTestCase.connect(addr0).publishFundraise(
@@ -484,7 +484,7 @@ describe("TrustableFund Contract", function() {
         });
 
         it("Should allow the fundraiser to cancel the fundraise and return the funds from smart contract", async function() {
-            const { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(deployTokenFixture);
+            let { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(deployTokenFixture);
 
             // Addr0 create a new fundraise
             await TrustableFundTestCase.connect(addr0).publishFundraise(
@@ -532,6 +532,4 @@ describe("TrustableFund Contract", function() {
 
         });
     });
-    // TODO: X: Donate to inactive fundraise
-
 });
