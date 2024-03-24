@@ -138,7 +138,85 @@ describe("TrustableFund Contract", function() {
             // Check if the donation id is correctly kept in the fundraise
             expect(fundraiseAfter.donationList[0]).to.equal(0);
         });
-    });
+
+        it("Shouldn't donate to a fundraise that is cancelled", async function() {
+            const { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(deployTokenFixture);
+            
+            // Step 1: Create a cancelled fundraise
+            // Addr0 create a new fundraise
+            await TrustableFundTestCase.connect(addr0).publishFundraise(
+                ethers.parseEther('100'),
+                "Test Fundraise Title",
+                "Test Fundraise Story Text",
+                "The image should be in the format of base64",
+                Math.floor(Date.now() / 1000) + 86400 // timestamp is in seconds
+                // set ddl 1 day after the creating time for testing
+            );
+
+            const fundId = (await TrustableFundTestCase.getFundList())[0].length - 1;
+
+            // Addr1 donates to the fundraise created by addr0
+            const donationAmount1 = ethers.parseEther('10');
+            await TrustableFundTestCase.connect(addr1).donation(
+                fundId,
+                "2024-01-01T12:00:00Z", { value: donationAmount1 }
+            );
+            // Addr2 donates to the fundraise created by addr0
+            const donationAmount2 = ethers.parseEther('20');
+            await TrustableFundTestCase.connect(addr2).donation(
+                fundId,
+                "2024-01-01T12:00:00Z", { value: donationAmount2 }
+            );
+
+            // Check addr1, addr2, smart contract's balance before cancelling
+            const addr1BalanceBefore = await ethers.provider.getBalance(addr1.address);
+            const addr2BalanceBefore = await ethers.provider.getBalance(addr2.address);
+            const contractBalanceBefore = await ethers.provider.getBalance(TrustableFundTestCase.getAddress());
+            // Addr0 cancels the funds
+            await TrustableFundTestCase.connect(addr0).cancelFundraise(
+                "Math.floor(Date.now() / 1000)"
+            )
+
+            // Check addr1, addr2, smart contract's balance after cancelling
+            const addr1BalanceAfter = await ethers.provider.getBalance(addr1.address);
+            const addr2BalanceAfter = await ethers.provider.getBalance(addr2.address);
+            const contractBalanceAfter = await ethers.provider.getBalance(TrustableFundTestCase.getAddress());
+
+            // Check changes in balance for addr1, addr2, smart contract
+            expect(addr1BalanceAfter - addr1BalanceBefore).to.equal(donationAmount1);
+            expect(addr2BalanceAfter - addr2BalanceBefore).to.equal(donationAmount2);
+            expect(contractBalanceBefore - contractBalanceAfter).to.equal(donationAmount1 + donationAmount2);
+
+            // Step 2: Try to donate to the cancelled fundraise
+            const fundraiseBefore = (await TrustableFundTestCase.getFundList())[0].find(f => f.fundID === BigInt(fundId));
+            const donationTotalBefore = fundraiseBefore.donation;
+
+            // Addr2 donate
+            const donationAmount = ethers.parseEther('1');
+            await expect(
+                    TrustableFundTestCase.connect(addr2).donation(
+                        fundId,
+                        "2024-01-01T12:00:33Z", {
+                            value: donationAmount
+                        }))
+                .to.be.revertedWith("fundraise is not active");
+            
+
+            // Check Addr2's donation history does not have the reverted donation
+            const donationList = (await TrustableFundTestCase.connect(addr2).getDonationHistoryByUser())[0];            
+            const donation = donationList.find(d => d.fundID === BigInt(fundId) && d.time === "2024-01-01T12:00:33Z");
+            expect(donationList.length).to.equal(1);
+            expect(!donation);
+
+            // Check if the donation amount remain unchanged in the fundraise
+            const fundraiseAfter = (await TrustableFundTestCase.connect(addr0).getFundList())[0].find(f => f.fundID === BigInt(fundId));
+            const donationTotalAfter = fundraiseAfter.donation;
+            expect(donationTotalAfter).to.equal(donationTotalBefore);
+
+            // Check if the donation ids remain unchanged in the fundraise
+            expect(fundraiseAfter.donationList.length).to.equal(fundraiseBefore.donationList.length);
+          });
+        });
 
     describe("Withdraw from a fundraise", function() {
         it("Should allow the fundraiser to withdraw once goal has reached", async function() {
@@ -371,7 +449,7 @@ describe("TrustableFund Contract", function() {
     });
 
     describe("Cancel a existed fundraise", function() {
-        it("Shouldn't allow the owner to cancel once fundraise is closed/inactive", async function() {
+        it("Shouldn't allow the fundraiser to cancel once fundraise is closed/inactive", async function() {
             const { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(deployTokenFixture);
 
             // Addr0 create a new fundraise
@@ -405,7 +483,7 @@ describe("TrustableFund Contract", function() {
 
         });
 
-        it("Should allow the onwer to cancel the fundraise and return the funds from smart contract", async function() {
+        it("Should allow the fundraiser to cancel the fundraise and return the funds from smart contract", async function() {
             const { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(deployTokenFixture);
 
             // Addr0 create a new fundraise
@@ -420,13 +498,13 @@ describe("TrustableFund Contract", function() {
 
             const fundId = (await TrustableFundTestCase.getFundList())[0].length - 1;
 
-            // Addr1 donates to the fundraise created by addr0, meeting the goal
+            // Addr1 donates to the fundraise created by addr0
             const donationAmount1 = ethers.parseEther('10');
             await TrustableFundTestCase.connect(addr1).donation(
                 fundId,
                 "2024-01-01T12:00:00Z", { value: donationAmount1 }
             );
-            // Addr2 donates to the fundraise created by addr0, meeting the goal
+            // Addr2 donates to the fundraise created by addr0
             const donationAmount2 = ethers.parseEther('20');
             await TrustableFundTestCase.connect(addr2).donation(
                 fundId,
@@ -442,7 +520,7 @@ describe("TrustableFund Contract", function() {
                 "Math.floor(Date.now() / 1000)"
             )
 
-            // Check addr1, addr2, smart contract's balance before cancelling
+            // Check addr1, addr2, smart contract's balance after cancelling
             const addr1BalanceAfter = await ethers.provider.getBalance(addr1.address);
             const addr2BalanceAfter = await ethers.provider.getBalance(addr2.address);
             const contractBalanceAfter = await ethers.provider.getBalance(TrustableFundTestCase.getAddress());
