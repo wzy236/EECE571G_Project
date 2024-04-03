@@ -1,7 +1,7 @@
 export const mockData = [
     {
       ownerAddress: "0x1234567890123456789012345678901234567890",
-      fundID: 1,
+      fundID: 0,
       goal: 1000,
       donation: 500,
       donationList: [100, 200, 200],
@@ -13,7 +13,7 @@ export const mockData = [
     },
     {
       ownerAddress: "0x0987654321098765432109876543210987654321",
-      fundID: 2,
+      fundID: 1,
       goal: 500,
       donation: 250,
       donationList: [50, 100, 100],

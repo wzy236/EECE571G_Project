@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { AppBar, Toolbar, Typography, Button, IconButton, Container, Box } from '@mui/material';
 import { injected } from '../utils/connectors';
-
+import TrustableFundArtifact from '../contracts/TrustableFund.sol/TrustableFund.json'
 import { useWeb3React } from '@web3-react/core';
+import { Contract, ethers, Signer } from 'ethers';
 
 // import Web3ABI from "../../pages/Web3"
 // let w3 = new Web3ABI();
@@ -11,61 +12,63 @@ export default function MetaMaskAuth() {
     const [userAddress, setUserAddress] = useState("");
     const [showModal, setShowModal] = useState(false)
 
-    const { active, account, library, connector, activate, deactivate } = useWeb3React()
+    const { active, account, library, activate, deactivate } = useWeb3React()
     const [signer, setSigner] = useState();
-    const [greeterContract, setGreeterContract] = useState();
-    const [greeterContractAddr, setGreeterContractAddr] = useState('');
-    const [greeting, setGreeting] = useState('');
-    const [greetingInput, setGreetingInput] = useState('');
-
-
-
-    // useEffect(()=> {
-    //     if (!library) {
-    //       setSigner(undefined);
-    //       return;
-    //     }
-    
-    //     setSigner(library.getSigner());
-    //   }, [library]);
-
+    const [trustableFundcontract, setTrustableFundContract] = useState();
+    const [trustableFundcontractAddr, setTrustableFundContractAddr] = useState('');
 
     
-    //   function handleDeployContract(event) {
+
+
+    useEffect(()=> {
+        if (!library) {
+          setSigner(undefined);
+          return;
+        }
     
-    //     if (greeterContract || !signer) {
-    //       return;
-    //     }
+        setSigner(library.getSigner());
+      }, [library]);
+
+
     
-    //     async function deployGreeterContract(signer) {
-    //       const Greeter = new ethers.ContractFactory(
-    //         GreeterArtifact.abi,
-    //         GreeterArtifact.bytecode,
-    //         signer
-    //       );
+
+      function handleDeployContract(event) {
     
-    //       try {
-    //         const greeterContract = await Greeter.deploy('Hello, Hardhat!');
+        if (!signer) {
+          window.alert("no signer")
+          return;
+        }
     
-    //         await greeterContract.deployed();
+        async function deployTrustableFundContract() {
+
+
+          const TrustableFund = new ethers.ContractFactory(
+            TrustableFundArtifact.abi,
+            TrustableFundArtifact.bytecode,
+            signer
+          );
     
-    //         const greeting = await greeterContract.greet();
+          try {
+
+
+            const TrustableFundContract = await TrustableFund.deploy();
     
-    //         setGreeterContract(greeterContract);
-    //         setGreeting(greeting);
+            const address=await TrustableFundContract.getAddress();
     
-    //         window.alert(`Greeter deployed to: ${greeterContract.address}`);
+            
+
+            window.alert(`TrustableFund deployed to: ${address}`);
     
-    //         setGreeterContractAddr(greeterContract.address);
-    //       } catch (error) {
-    //         window.alert(
-    //           'Error!' + (error && error.message ? `\n\n${error.message}` : '')
-    //         );
-    //       }
-    //     }
+            setTrustableFundContractAddr(address);
+          } catch (error) {
+            window.alert(
+              'Error!' + (error && error.message ? `\n\n${error.message}` : '')
+            );
+          }
+        }
     
-    //     deployGreeterContract(signer);
-    //   }
+        deployTrustableFundContract(signer);
+      }
     
 
 
@@ -103,7 +106,7 @@ export default function MetaMaskAuth() {
 
                     <Button sx={{color:"white"}} onClick={disconnect} >Disconnect</Button>
 
-                    <Button sx={{color:"white"}}  >deployContract</Button>
+                    <Button sx={{color:"white"}} onClick={handleDeployContract}  >deployContract</Button>
                 </Box>
             </>
         ) : (

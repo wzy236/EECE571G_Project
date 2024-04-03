@@ -1,21 +1,68 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { mockData } from '../component/mockdata';
 import { TextField, List, ListItem, ListItemText, ListItemAvatar, Avatar, Container, Box, Typography, LinearProgress, Button } from '@mui/material';
 import {useNavigate } from 'react-router-dom';
 import {ProgressBar} from '../component/Progress';
-
+import TrustableFundArtifact from '../contracts/TrustableFund.sol/TrustableFund.json'
+import { useWeb3React } from '@web3-react/core';
+import { ethers} from 'ethers';
 
 const DonateListPage = () => {
+
+  const { library} = useWeb3React()
   const [searchTerm, setSearchTerm] = useState('');
-  const [items, setItems] = useState(mockData);
+  const [fundList, setFundList] = useState([]);
+  const [signer,  setSigner] = useState();
+  const [contract, setContract] = useState();
   const navigate = useNavigate();
+
+  const address='0x4C613BC930360fb932379286b033CDe2329DC75F'
+
+  useEffect(()=> {
+    if (!library) {
+      setSigner(undefined);
+      return;
+    }
+
+    setSigner(library.getSigner());
+    setContract(new ethers.Contract(address, TrustableFundArtifact.abi, library.getSigner()));
+    
+
+  }, [library]);
+
+  useEffect(()=> {
+    if (!contract) {
+      return;
+    }
+    _GetFundraise()
+    
+  }, [contract]);
+
+  const _GetFundraise = async ()=>{
+    const fundList = await contract.getFundList(); 
+    //add update the bigint into number
+    const updateFundList= fundList[0].map(f=>({
+      ownerAddress: f.ownerAddress,
+      fundID: Number(f.fundID),
+      goal: parseFloat(ethers.formatEther(f.goal)),
+      donation: parseFloat(ethers.formatEther(f.donation)),
+      donationList: f.donationList,
+      deadLine: Number(f.deadLine),
+      storyTitle: f.storyTitle,
+      storyText: f.storyText,
+      imageurl: f.imageurl,
+      active: f.active
+    }));
+    console.log(updateFundList);
+    setFundList(updateFundList);
+  };
 
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
     const filteredItems =  mockData.filter(item =>
       item.storyTitle.toLowerCase().includes(event.target.value.toLowerCase())
     );
-    setItems(filteredItems);
+    setFundList(filteredItems);
   };
 
 
@@ -43,7 +90,7 @@ const DonateListPage = () => {
         style={{ marginBottom: '20px' }}
       />
       <List>
-        {items.map(item => (
+        {fundList.map(item => (
           <ListItem key={item.id} sx={{height:"400px", alignItems:"center"}}>
             <Box sx={{width:"100%", display:"grid", gridTemplateColumns:"30% 30% 40%", height:"300px"}}>
               <img src={item.imageurl} style={{width:"100%", height:"100%"}}/>

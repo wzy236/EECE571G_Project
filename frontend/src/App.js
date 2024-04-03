@@ -9,13 +9,16 @@ import DonateHistoryPage from './pages/DonateHistoryPage';
 import FundraisingProjectPage from './pages/FundraisingProjectPage';
 import DonatePage from './pages/DonatePage';
 import { Web3ReactProvider } from '@web3-react/core'
-import Web3 from 'web3'
+import { Web3Provider } from '@ethersproject/providers';
+
 
 function getLibrary(provider) {
-  return new Web3(provider)
+  return new Web3Provider(provider)
 }
 
 function App() {
+
+
   return (
     <div className="App">
     <Web3ReactProvider getLibrary={getLibrary}>
@@ -25,7 +28,6 @@ function App() {
           <Route path="/" exact element={<HomePage />} />
           <Route path="/donate/:id" element={<DonatePage />} />
           <Route path="/donate" element={<DonateListPage />} />
-          <Route path="/donatelist" element={<DonateListPage />} />
           <Route path="/fundraise" element={<FundRaisePage />} />
           <Route path="/donatehistory" element={<DonateHistoryPage />} />
           <Route path="/fundraisingproject" element={<FundraisingProjectPage />} />
