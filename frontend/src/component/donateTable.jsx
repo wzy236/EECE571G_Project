@@ -19,7 +19,7 @@ const columns = [
     label: 'amount',
     minWidth: 170,
     align: 'center',
-    format: (value) => parseFloat(ethers.formatEther(value)),
+    format: (value) => parseFloat(ethers.utils.formatEther(value)),
   },
   {
     id: 'time',
@@ -30,10 +30,6 @@ const columns = [
   },
 ];
 
-function createData(name, code, population, size) {
-  const density = population / size;
-  return { name, code, population, size, density };
-}
 
 
 export default function DonationTable( props ) {

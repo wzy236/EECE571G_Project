@@ -12,7 +12,6 @@ const DonateListPage = () => {
   const { library} = useWeb3React()
   const [searchTerm, setSearchTerm] = useState('');
   const [fundList, setFundList] = useState([]);
-  const [signer,  setSigner] = useState();
   const [contract, setContract] = useState();
   const navigate = useNavigate();
 
@@ -20,14 +19,9 @@ const DonateListPage = () => {
 
   useEffect(()=> {
     if (!library) {
-      setSigner(undefined);
       return;
     }
-
-    setSigner(library.getSigner());
     setContract(new ethers.Contract(address, TrustableFundArtifact.abi, library.getSigner()));
-    
-
   }, [library]);
 
   useEffect(()=> {
@@ -44,8 +38,8 @@ const DonateListPage = () => {
     const updateFundList= fundList[0].map(f=>({
       ownerAddress: f.ownerAddress,
       fundID: Number(f.fundID),
-      goal: parseFloat(ethers.formatEther(f.goal)),
-      donation: parseFloat(ethers.formatEther(f.donation)),
+      goal: parseFloat(ethers.utils.formatEther(f.goal)),
+      donation: parseFloat(ethers.utils.formatEther(f.donation)),
       donationList: f.donationList,
       deadLine: Number(f.deadLine),
       storyTitle: f.storyTitle,
@@ -59,7 +53,7 @@ const DonateListPage = () => {
 
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
-    const filteredItems =  mockData.filter(item =>
+    const filteredItems =  fundList.filter(item =>
       item.storyTitle.toLowerCase().includes(event.target.value.toLowerCase())
     );
     setFundList(filteredItems);

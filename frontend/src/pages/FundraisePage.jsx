@@ -25,8 +25,9 @@ const FundraisePage = () => {
     if (!library) {
       return;
     }
+    const providers=new ethers.providers.Web3Provider(window.ethereum);
 
-    setContract(new ethers.Contract(address, TrustableFundArtifact.abi, library.getSigner()));
+    setContract(new ethers.Contract(address, TrustableFundArtifact.abi, providers.getSigner()));
   }, [library]);
 
   const handleSubmit = (e) => {
@@ -38,7 +39,7 @@ const FundraisePage = () => {
     
     const _PublishFundraise = async ()=>{
       try{
-        await contract.publishFundraise(ethers.parseEther(amount), title, description, image, Math.floor(date/ 1000)); 
+        await contract.publishFundraise(ethers.utils.parseEther(amount), title, description, image, Math.floor(date/ 1000)); 
       }catch(e){
         alert(e.data.message)
       }

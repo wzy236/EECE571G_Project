@@ -48,8 +48,8 @@ const DonatePage = () => {
     const updateFundList= fundList[0].map(f=>({
       ownerAddress: f.ownerAddress,
       fundID: Number(f.fundID),
-      goal: parseFloat(ethers.formatEther(f.goal)),
-      donation: parseFloat(ethers.formatEther(f.donation)),
+      goal: parseFloat(ethers.utils.formatEther(f.goal)),
+      donation: parseFloat(ethers.utils.formatEther(f.donation)),
       donationList: f.donationList,
       deadLine: Number(f.deadLine),
       storyTitle: f.storyTitle,
@@ -80,8 +80,11 @@ const DonatePage = () => {
     try {
       const currentTime= new Date();
 
-      const txn = await contract.donation(BigInt(parseInt(id)),currentTime.toISOString(), {value: ethers.parseEther(amount)}); 
+      const txn = await contract.donation(BigInt(parseInt(id)),currentTime.toISOString(), {value: ethers.utils.parseEther(amount)}); 
       
+      await txn.wait();
+
+      console.log(txn);
 
       } catch (error) {
         window.alert(
