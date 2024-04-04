@@ -6,6 +6,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import TrustableFundArtifact from '../contracts/TrustableFund.sol/TrustableFund.json'
 import { useWeb3React } from '@web3-react/core';
 import {  ethers, Signer } from 'ethers';
+import React from 'react';
 
 
 const FundraisePage = () => {
@@ -82,7 +83,7 @@ const FundraisePage = () => {
           />
           <Box sx={{display:'grid', gridTemplateColumns:"300px 600px", gridRowGap:'50px' }} my={'50px'}>
             
-          <Typography variant='h6' marginY={'auto'}> Choose your end date: </Typography>
+          <Typography variant='h6' marginY={'auto'}> Input your target amount: </Typography>
             <TextField
                 id="outlined-adornment-weight"
                 label="Donation Amount"
@@ -96,7 +97,7 @@ const FundraisePage = () => {
               />
 
             
-            <Typography variant='h6' marginY={'auto'}> Input your target amount: </Typography>
+            <Typography variant='h6' marginY={'auto'}> Choose your end date: </Typography>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker
                 value={date}
