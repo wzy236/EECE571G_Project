@@ -532,4 +532,68 @@ describe("TrustableFund Contract", function() {
 
         });
     });
+
+    describe("Get fund title for existed fund ID", function() {
+        it("Should get the right title for the given fundID", async function() {
+            let { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(deployTokenFixture);
+
+            // Addr0 create a new fundraise
+            await TrustableFundTestCase.connect(addr0).publishFundraise(
+                ethers.parseEther('100'),
+                "Test Fundraise Title1",
+                "Test Fundraise Story Text",
+                "The image should be in the format of base64",
+                Math.floor(Date.now() / 1000) + 86400 // timestamp is in seconds
+                // set ddl 1 day after the creating time for testing
+            );
+            
+            // Get the first fundraising's fundID
+            const fundId1 = (await TrustableFundTestCase.getFundList())[0].length - 1;
+
+            // Addr1 create another new fundraise
+            await TrustableFundTestCase.connect(addr1).publishFundraise(
+                ethers.parseEther('100'),
+                "Test Fundraise Title2",
+                "Test Fundraise Story Text",
+                "The image should be in the format of base64",
+                Math.floor(Date.now() / 1000) + 86400 // timestamp is in seconds
+                // set ddl 1 day after the creating time for testing
+            );
+
+            // Get the second fundraising's fundID
+            const fundId2 = (await TrustableFundTestCase.getFundList())[0].length - 1;
+
+            // use function to get fund titles 
+            const fundtitle1 = await TrustableFundTestCase.getFundTitle(fundId1);
+            const fundtitle2 = await TrustableFundTestCase.getFundTitle(fundId2);
+
+            // Check changes in balance for addr1, addr2, smart contract
+            expect(fundtitle1).to.equal("Test Fundraise Title1");
+            expect(fundtitle2).to.equal("Test Fundraise Title2");
+        });
+
+        it("Fail to get the fund title for a non-existed fundID", async function() {
+            let { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(deployTokenFixture);
+
+            // Addr0 create a new fundraise
+            await TrustableFundTestCase.connect(addr0).publishFundraise(
+                ethers.parseEther('100'),
+                "Test Fundraise Title1",
+                "Test Fundraise Story Text",
+                "The image should be in the format of base64",
+                Math.floor(Date.now() / 1000) + 86400 // timestamp is in seconds
+                // set ddl 1 day after the creating time for testing
+            );
+            
+            // Get the first fundraising's fundID
+            const fundId1 = (await TrustableFundTestCase.getFundList())[0].length - 1;
+
+            // Addr0 trys to get the fund title for non-existed fund ID but should fail 
+            await expect(
+                TrustableFundTestCase.connect(addr0).getFundTitle(
+                    fundId1 + 1
+                )
+            ).to.be.revertedWith("This fund ID does not exist");
+        });
+    });
 });

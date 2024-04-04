@@ -25,7 +25,7 @@ function App() {
     <BrowserRouter>
         <NavBar />
         <Routes>
-          <Route path="/" exact element={<HomePage />} />
+          <Route path="/home" exact element={<HomePage />} />
           <Route path="/donate/:id" element={<DonatePage />} />
           <Route path="/donate" element={<DonateListPage />} />
           <Route path="/fundraise" element={<FundRaisePage />} />

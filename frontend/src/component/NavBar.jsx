@@ -21,6 +21,7 @@ const NavBar = () => {
 
         <Box sx={{ width: "50%", display:"grid", gridTemplateColumns:"800px 200px 200px", }}>
           <Box sx={{ display: "flex", justifyContent:" space-between", alignItems: 'bottom' }}>
+            <Button color="inherit" component={Link} to="/home">Home Page</Button>
             <Button color="inherit" component={Link} to="/donate">Donate</Button>
             <Button color="inherit" component={Link} to="/fundraise">Fundraise</Button>
             <Button color="inherit" component={Link} to="/donatehistory">Donate History</Button>

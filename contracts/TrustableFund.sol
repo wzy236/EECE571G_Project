@@ -32,6 +32,9 @@ contract TrustableFund {
     // User address to user created fundRecord information <address, fund index array>
     mapping(address => uint[]) fundRecords;
 
+    // Fund ID to Fund Tile
+    mapping(uint => string) fundTitles;
+
 
     event CreateFundSuccess(uint fundID, string storyTitle,uint goal);
     event DonateSuccess(uint fundID, uint donateID, uint amout);
@@ -95,6 +98,8 @@ contract TrustableFund {
 
         // push the fundID to user's fund record
         fundRecords[msg.sender].push(fundID);
+        // store fund title for each fund ID
+        fundTitles[fundID] = _storyTitle;
 
         emit CreateFundSuccess(fundID , _storyTitle, _goal);
     }
@@ -220,6 +225,12 @@ contract TrustableFund {
         fundList[latestID].active = false;
 
         emit CancelSuccess(latestID, fundList[latestID].donation);
+    }
+
+    //  get the fund title by given fund ID 
+        function getFundTitle(uint _fundID) public view returns (string memory) {
+        require(_fundID < fundList.length, "This fund ID does not exist");
+        return fundTitles[_fundID];
     }
     
 
