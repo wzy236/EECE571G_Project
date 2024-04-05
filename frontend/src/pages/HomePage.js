@@ -51,7 +51,8 @@ const HomePage = () => {
 
   const _GetFundraise = async () => {
     const fundList = await contract.getFundList();
-    const updateFundList = fundList[0].map((f) => ({
+    const updateFundList = fundList[0]
+    .map((f) => ({
       ownerAddress: f.ownerAddress,
       fundID: Number(f.fundID),
       goal: parseFloat(ethers.utils.formatEther(f.goal)),
@@ -62,7 +63,8 @@ const HomePage = () => {
       storyText: f.storyText,
       imageurl: f.imageurl,
       active: f.active,
-    }));
+    }))
+    .filter((f) => !f.canceled && f.donation < f.goal && new Date() < new Date(f.deadLine * 1000));
     setFundList(updateFundList);
   };
 

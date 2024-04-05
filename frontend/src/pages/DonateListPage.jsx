@@ -115,7 +115,7 @@ const DonateListPage = () => {
             >
               <img
                 src={item.imageurl}
-                style={{ width: "100%", height: "100%" }}
+                style={{ width: "100%", maxHeight: "350px", objectFit: "cover" }}
               />
               <Box
                 sx={{
@@ -150,16 +150,17 @@ const DonateListPage = () => {
                   value={Math.round((item.donation / item.goal) * 100)}
                   width={"60%"}
                 />
-                <Button
-                  variant="contained"
-                  sx={{ width: "200px" }}
-                  onClick={() => {
-                    navigate("/donate/" + item.fundID);
-                  }}
-                >
-                  {" "}
-                  Donation
-                </Button>
+                {!item.canceled && item.donation < item.goal && new Date() < new Date(item.deadLine * 1000) ? (
+                  // if not canceled and not reached the goal and not ended
+                  // show donation button
+                  <Button variant="contained" sx={{width:"200px"}} onClick={() => { navigate('/donate/' + item.fundID); }}>Donation</Button>
+                ) : item.canceled ? (
+                  // show canceled button
+                  <Button variant="outlined" sx={{width:"200px"}} disabled>Fundraising Canceled</Button>
+                ) : (
+                  // show ended button
+                  <Button variant="outlined" sx={{width:"200px"}} disabled>Fundraising Ended</Button>
+                )}
               </Box>
             </Box>
           </ListItem>
