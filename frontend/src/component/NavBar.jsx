@@ -89,33 +89,13 @@ const NavBar = () => {
               aria-label="nav tabs example"
               role="navigation"
             >
-              <LinkTab label="Home Page" to="/home" />
+              <LinkTab label="Home Page" to="/" />
               <LinkTab label="Donate" to="/donate" />
               <LinkTab label="Fundraise" to="/fundraise" />
               <LinkTab label="Donate History" to="/donatehistory" />
               <LinkTab label="Fundraising Project" to="/fundraisingproject" />
             </Tabs>
           </Box>
-
-          {/* <Button color="inherit" component={Link} to="/home">
-            Home Page
-          </Button>
-          <Divider orientation="vertical" variant="middle" flexItem />
-          <Button color="inherit" component={Link} to="/donate">
-            Donate
-          </Button>
-          <Divider orientation="vertical" variant="middle" flexItem />
-          <Button color="inherit" component={Link} to="/fundraise">
-            Fundraise
-          </Button>
-          <Divider orientation="vertical" variant="middle" flexItem />
-          <Button color="inherit" component={Link} to="/donatehistory">
-            Donate History
-          </Button>
-          <Divider orientation="vertical" variant="middle" flexItem />
-          <Button color="inherit" component={Link} to="/fundraisingproject">
-            Fundraising Project
-          </Button> */}
 
           <Button color="inherit"></Button>
 
