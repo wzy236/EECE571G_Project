@@ -15,10 +15,12 @@ const BorderLinearProgress = styled(LinearProgress)(({ theme }) => ({
   }));
 
 export function ProgressBar(props) {
+    const visualValue = Math.min(props.value, 100);
+
     return (
         <Box sx={{ display: 'flex', alignItems: 'center', flexDirection:"row", justifyContent:'center', width: props.width}} mb={10}>
             <Box sx={{ width: "100%", mr: 1 }}>
-            <BorderLinearProgress  variant="determinate" value={props.value}/>
+            <BorderLinearProgress  variant="determinate" value={visualValue}/>
             </Box>
             <Box sx={{ minWidth: 35 }}>
             <Typography variant="body2" color="text.secondary">{`${props.value}%`}</Typography>
