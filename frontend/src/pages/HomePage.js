@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from "react";
 import {
-  TextField,
   Container,
   Box,
   Typography,
   Button,
-  ImageListItem,
-  ImageListItemBar,
   Divider,
+  Card,
+  CardMedia,
+  CardContent,
+  CardActionArea,
+  Grid,
 } from "@mui/material";
+import { spacing } from "@mui/system";
 import { useNavigate } from "react-router-dom";
-import { ProgressBar } from "../component/Progress";
 import TrustableFundArtifact from "../contracts/TrustableFund.sol/TrustableFund.json";
 import { useWeb3React } from "@web3-react/core";
 import { ethers } from "ethers";
@@ -52,19 +54,24 @@ const HomePage = () => {
   const _GetFundraise = async () => {
     const fundList = await contract.getFundList();
     const updateFundList = fundList[0]
-    .map((f) => ({
-      ownerAddress: f.ownerAddress,
-      fundID: Number(f.fundID),
-      goal: parseFloat(ethers.utils.formatEther(f.goal)),
-      donation: parseFloat(ethers.utils.formatEther(f.donation)),
-      donationList: f.donationList,
-      deadLine: Number(f.deadLine),
-      storyTitle: f.storyTitle,
-      storyText: f.storyText,
-      imageurl: f.imageurl,
-      active: f.active,
-    }))
-    .filter((f) => f.active && f.donation < f.goal && new Date() < new Date(f.deadLine * 1000));
+      .map((f) => ({
+        ownerAddress: f.ownerAddress,
+        fundID: Number(f.fundID),
+        goal: parseFloat(ethers.utils.formatEther(f.goal)),
+        donation: parseFloat(ethers.utils.formatEther(f.donation)),
+        donationList: f.donationList,
+        deadLine: Number(f.deadLine),
+        storyTitle: f.storyTitle,
+        storyText: f.storyText,
+        imageurl: f.imageurl,
+        active: f.active,
+      }))
+      .filter(
+        (f) =>
+          f.active &&
+          f.donation < f.goal &&
+          new Date() < new Date(f.deadLine * 1000)
+      );
     setFundList(updateFundList);
   };
 
@@ -73,64 +80,61 @@ const HomePage = () => {
       style={{
         maxWidth: "80%",
         textAlign: "center",
-        marginTop: "50px",
+        marginTop: "30px",
+        marginBottom: "30px",
         alignItems: "center",
       }}
     >
       {/*box for top images and two bottons */}
-      <Box style={{ marginButtom: "40px", height: "30%" }}>
-        <Box
-          style={{
-            width: "100%",
-            display: "grid",
-            gridTemplateColumns: "70% 30%",
-          }}
-        >
-          <Box
-            style={{
-              width: "70%",
-              alignItems: "center",
-              mariginLeft: "400px",
-              maxHeight: "300px",
-            }}
-          >
-            <SimpleSlider />
-          </Box>
-          <Box style={{ width: "30%", marginTop: "50px" }}>
-            <Button
-              variant="outlined"
-              color="inherit"
-              component={Link}
-              to="/donate"
-              style={{ marginTop: "30px", width: "300%", height: "40%" }}
-            >
-              <FaHandHoldingHeart
-                style={{ width: "40%", height: "50%" }}
-              ></FaHandHoldingHeart>
-              <h3>Donate Now</h3>
-            </Button>
-            <Button
-              variant="outlined"
-              color="inherit"
-              component={Link}
-              to="/fundraise"
-              style={{ marginTop: "30px", width: "300%", height: "40%" }}
-            >
-              <FaRegPenToSquare
-                style={{ width: "40%", height: "50%" }}
-              ></FaRegPenToSquare>
-              <h3>Fundraise Now</h3>
-            </Button>
-          </Box>
+      <Box>
+        <Grid container spacing={1}>
+          <Grid item xs={8}>
+            <Box sx={{ mx: 2, width: "90%" }}>
+              <SimpleSlider />
+            </Box>
+          </Grid>
+          <Grid item xs={4} sx={{ mx: "auto", my: "auto" }}>
+            <Box>
+              <Button
+                startIcon={<FaHandHoldingHeart />}
+                fullWidth={true}
+                variant="outlined"
+                color="inherit"
+                component={Link}
+                bold
+                to="/donate"
+                sx={{ mx: "auto", fontSize: "h6.fontSize" }}
+                // style={{ justifyContent: "flex-start" }}
+                // style={{ width: "300%", height: "40%" }}
+              >
+                Donate Now
+              </Button>
+              <p />
+              <Button
+                startIcon={<FaRegPenToSquare />}
+                fullWidth={true}
+                variant="outlined"
+                color="inherit"
+                component={Link}
+                to="/fundraise"
+                sx={{ mx: "auto", fontSize: "h6.fontSize" }}
+                // style={{ justifyContent: "flex-start" }}
+                // style={{ marginTop: "30px", width: "300%", height: "40%" }}
+              >
+                Fundraise Now
+              </Button>
+            </Box>
+          </Grid>
+        </Grid>
+      </Box>
+      {/*box for divider */}
+      <container>
+        <Box sx={{ my: 3 }} style={{ textAlign: "center" }}>
+          <Divider variant="middle">
+            <Typography variant="h6">Fundraising in progress </Typography>
+          </Divider>
         </Box>
-
-        {/*box for divider */}
-      </Box>
-      <Box style={{ marginTop: "200px", textAlign: "center" }}>
-        <Divider variant="middle">
-          <Typography variant="h6">Fundraising in progress </Typography>
-        </Divider>
-      </Box>
+      </container>
 
       {/*box for the fundraising project list */}
       <Box
@@ -142,33 +146,27 @@ const HomePage = () => {
         }}
       >
         {fundList.map((item) => (
-          <ImageListItem key={item.id}>
-            <img src={item.imageurl} alt={item.title} />
-            <ImageListItemBar
-              title={<Typography variant="h5">{item.storyTitle}</Typography>}
-              subtitle={
-                <div>
-                  <Typography variant="h6">
-                    Already Raised: {item.donation} <br />
-                    Number of Participant: {item.donationList.length}
-                  </Typography>
-                </div>
-              }
-              position="below"
-              actionIcon={
-                <Button
-                  variant="contained"
-                  style={{ width: "100%", marginTop: "30px" }}
-                  onClick={() => {
-                    navigate("/donate/" + item.fundID);
-                  }}
-                >
-                  {" "}
-                  Donation
-                </Button>
-              }
-            />
-          </ImageListItem>
+          <Card sx={{ maxWidth: 345 }} key={item.id}>
+            <CardActionArea
+              onClick={() => {
+                navigate("/donate/" + item.fundID);
+              }}
+            >
+              <CardMedia
+                sx={{ height: 140 }}
+                image={item.imageurl}
+                title={item.storyTitle}
+              />
+              <CardContent>
+                <Typography gutterBottom variant="h7" component="div">
+                  {item.storyTitle}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {item.storyText.slice(0, 100) + "..."}
+                </Typography>
+              </CardContent>
+            </CardActionArea>
+          </Card>
         ))}
       </Box>
     </Container>
