@@ -47,15 +47,11 @@ const DonateHistoryPage = () => {
 
   const _GetDonationHistoryByUser = async () => {
     const _donationHistory = await contract.getDonationHistoryByUser();
-    const _modifiedDonationHistory = _donationHistory[0].map(async (item) => {
+    const _modifiedDonationHistory = await Promise.all(_donationHistory[0].map(async (item) => {
       const fundTitle = await contract.getFundTitle(item.fundID);
       console.log(fundTitle);
       return { ...item, fundTitle };
-    });
-    // const _modifiedDonationHistory = _donationHistory[0].map((item) => ({
-    //   ...item,
-    //   fundTitle: "Your Fund Title", // Replace 'Your Fund Title' later
-    // }));
+    }));
     console.log(_donationHistory[0]);
     setDonationHistory(_modifiedDonationHistory);
   };
