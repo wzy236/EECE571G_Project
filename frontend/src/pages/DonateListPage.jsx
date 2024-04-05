@@ -12,6 +12,7 @@ import {
   Typography,
   LinearProgress,
   Button,
+  Divider,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { ProgressBar } from "../component/Progress";
@@ -103,45 +104,51 @@ const DonateListPage = () => {
         {fundList.map((item) => (
           <ListItem
             key={item.id}
-            sx={{ height: "400px", alignItems: "center" }}
+            sx={{ height: "250px", alignItems: "center" }}
+            divider={true}
           >
             <Box
               sx={{
                 width: "100%",
                 display: "grid",
                 gridTemplateColumns: "30% 30% 40%",
-                height: "300px",
+                my: "auto",
               }}
             >
               <img
                 src={item.imageurl}
-                style={{ width: "100%", maxHeight: "350px", objectFit: "cover" }}
+                style={{
+                  width: "100%",
+                  maxHeight: "200px",
+                  objectFit: "cover",
+                  my: "auto",
+                }}
               />
               <Box
                 sx={{
                   display: "flex",
                   justifyContent: "space-between",
-                  padding: "40px",
+                  padding: "20px",
                   flexDirection: "column",
                 }}
               >
                 <Typography variant="h5">{item.storyTitle}</Typography>
-                <Typography variant="h6">
+                <Typography variant="h7">
                   Target Amount: {item.goal} <br />
-                  End Time: {unixTimeToDate(item.deadLine)}
+                  End Date: {unixTimeToDate(item.deadLine)}
                 </Typography>
               </Box>
 
               <Box
                 sx={{
                   display: "flex",
-                  justifyContent: "center",
+                  justifyContent: "space-between",
                   alignItems: "center",
-                  paddingLeft: "20px",
+                  padding: "20px",
                   flexDirection: "column",
                 }}
               >
-                <Typography mb={3}>
+                <Typography>
                   Already Raised: {item.donation} <br />
                   Number of Participant: {item.donationList.length}
                 </Typography>
@@ -150,13 +157,26 @@ const DonateListPage = () => {
                   value={Math.round((item.donation / item.goal) * 100)}
                   width={"60%"}
                 />
-                {!item.canceled && item.donation < item.goal && new Date() < new Date(item.deadLine * 1000) ? (
+
+                {!item.canceled &&
+                item.donation < item.goal &&
+                new Date() < new Date(item.deadLine * 1000) ? (
                   // if not canceled and not reached the goal and not ended
                   // show donation button
-                  <Button variant="contained" sx={{width:"200px"}} onClick={() => { navigate('/donate/' + item.fundID); }}>Donate Now</Button>
-                ) :  (
+                  <Button
+                    variant="contained"
+                    sx={{ width: "60%" }}
+                    onClick={() => {
+                      navigate("/donate/" + item.fundID);
+                    }}
+                  >
+                    Donate Now
+                  </Button>
+                ) : (
                   // show canceled button
-                  <Button variant="outlined" sx={{width:"200px"}} disabled>Fundraising Closed</Button>
+                  <Button variant="outlined" sx={{ width: "60%" }} disabled>
+                    Fundraising Closed
+                  </Button>
                 )}
               </Box>
             </Box>
