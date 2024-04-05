@@ -64,7 +64,7 @@ const HomePage = () => {
       imageurl: f.imageurl,
       active: f.active,
     }))
-    .filter((f) => !f.canceled && f.donation < f.goal && new Date() < new Date(f.deadLine * 1000));
+    .filter((f) => f.active && f.donation < f.goal && new Date() < new Date(f.deadLine * 1000));
     setFundList(updateFundList);
   };
 

@@ -167,7 +167,7 @@ const DonatePage = () => {
                   onClick={handleDonate}
                 >
                   {" "}
-                  Donation
+                  Donate
                 </Button>
               </Box>
             </Box>

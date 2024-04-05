@@ -6,6 +6,7 @@ import {ProgressBar} from '../component/Progress';
 import TrustableFundArtifact from '../contracts/TrustableFund.sol/TrustableFund.json'
 import { useWeb3React } from '@web3-react/core';
 import { ethers} from 'ethers';
+import { unixTimeToDate } from './DonateListPage';
 
 const FundraisingProjectPage = () => {
 
@@ -14,9 +15,16 @@ const FundraisingProjectPage = () => {
   const [contract, setContract] = useState();
   const navigate = useNavigate();
 
-  const [open, setOpen] = React.useState(false);
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
+
+  const [openWithdrawDialog, setOpenWithdrawDialog] = useState(false);
+  const [openCancelDialog, setOpenCancelDialog] = useState(false);
+
+  const [isProgressOpen, setIsProgressOpen] = useState(false);
+  const [progressMessage, setProgressMessage] = useState("");
+
+  const [refresh, setRefresh] = useState(false);
 
   const address='0x4AfEC11A9E24462E87cf33D8CB3C5f2B69018166'
 
@@ -32,8 +40,8 @@ const FundraisingProjectPage = () => {
       return;
     }
     _GetFundraiseList()
-    
-  }, [contract]);
+    setRefresh(false);
+  }, [contract, refresh]);
 
   const _GetFundraiseList = async ()=>{
     const fundRaiseList = await contract.getFundraiseByUser(); 
@@ -67,12 +75,82 @@ const FundraisingProjectPage = () => {
     return date.toLocaleDateString(); // Adjust format as needed
   }
 
-  const handleClickOpen = () => {
-    setOpen(true);
+  const handleOpenWithdrawDialog = () => {
+    setOpenWithdrawDialog(true);
+  };
+  
+  const handleCloseWithdrawDialog = () => {
+    setOpenWithdrawDialog(false);
+  };
+  
+  const handleOpenCancelDialog = () => {
+    setOpenCancelDialog(true);
+  };
+  
+  const handleCloseCancelDialog = () => {
+    setOpenCancelDialog(false);
   };
 
-  const handleClose = () => {
-    setOpen(false);
+  const withdrawFunds = async (e) => {
+    e.preventDefault();
+    if (!library) {
+      alert("Please log in to your account.");
+      return;
+    }
+    
+    try {
+      console.log("Start withdrawing funds...");
+
+      setProgressMessage("Withdrawing funds... Please wait.");
+      setIsProgressOpen(true);
+
+      const txn = await contract.withdrawFundraise();
+      await txn.wait();
+
+      console.log("Funds withdrawn:", txn);
+
+      handleCloseWithdrawDialog();
+    } catch (error) {
+      window.alert(
+        "Error!" + (error && error.message ? `\n\n${error.message}` : "")
+      );
+    }
+    setIsProgressOpen(false);
+    alert("Funds have been withdrawn");
+    setRefresh(true);
+  };
+
+  const cancelFundraise = async (e) => {
+    e.preventDefault();
+    if (!library) {
+      alert("Please log in to your account.");
+      return;
+    }
+    
+    try {
+      console.log("Start canceling fundraise...");
+
+      setProgressMessage("Canceling fundraising project... Please wait.");
+      setIsProgressOpen(true);
+
+      const currentTime = new Date();
+
+      const txn = await contract.cancelFundraise(
+        currentTime.toISOString()
+      );
+      await txn.wait();
+
+      console.log("Fundraise canceled:", txn);
+
+      handleCloseCancelDialog();
+    } catch (error) {
+      window.alert(
+        "Error!" + (error && error.message ? `\n\n${error.message}` : "")
+      );
+    }
+    setIsProgressOpen(false);
+    alert("Fundraising project has been canceled")
+    setRefresh(true);
   };
 
 
@@ -101,57 +179,85 @@ const FundraisingProjectPage = () => {
 
                 <ProgressBar value={Math.round(item.donation/item.goal*100)} width={"60%"} />
 
-                <div>
-                  <Button variant="contained" sx={{width:"200px", marginBottom: '20px'}}
-                  onClick={handleClickOpen}> Withdraw </Button>
-                  <Dialog
-                    fullScreen={fullScreen}
-                    open={open}
-                    onClose={handleClose}
-                    aria-labelledby="responsive-dialog-withdraw-title"
-                  >
-                    <DialogTitle id="responsive-dialog-withdraw-title">{"Confirm Withdrawal?"}</DialogTitle>
-                    <DialogContent>
-                      <DialogContentText>
-                       Are you sure you want to withdraw the funds? This action cannot be undone.
-                      </DialogContentText>
-                    </DialogContent>
-                    <DialogActions>
-                      <Button autoFocus onClick={handleClose} color="primary">
-                        Yes
-                      </Button>
-                      <Button onClick={handleClose} color="primary" autoFocus>
-                        No
-                      </Button>
-                    </DialogActions>
-                  </Dialog>
-              </div>
+                {!item.active ? (
+                  <Button variant="outlined" sx={{width:"200px"}} disabled>Fundraising Canceled</Button>
+                ) :(
+                  // Withdraw and Cancel button
+                  <>
+                  {/* Only allow withdraw funds if goal has reached or deadline has passed */}
+                  {!(item.donation < item.goal && new Date() < new Date(item.deadLine * 1000)) && (
+                    <div>
+                      <Button variant="contained" sx={{width:"200px", marginBottom: '20px'}}
+                      onClick={handleOpenWithdrawDialog}> Withdraw Funds</Button>
+                      <Dialog
+                        fullScreen={fullScreen}
+                        open={openWithdrawDialog}
+                        onClose={handleCloseWithdrawDialog}
+                        aria-labelledby="responsive-dialog-withdraw-title"
+                      >
+                        <DialogTitle id="responsive-dialog-withdraw-title">{"Confirm Withdrawal?"}</DialogTitle>
+                        <DialogContent>
+                          <DialogContentText>
+                          Are you sure you want to withdraw the funds? This action cannot be undone.
+                          </DialogContentText>
+                        </DialogContent>
+                        <DialogActions>
+                          <Button autoFocus onClick={withdrawFunds} color="primary">
+                            Yes
+                          </Button>
+                          <Button onClick={handleCloseWithdrawDialog} color="primary" autoFocus>
+                            No
+                          </Button>
+                        </DialogActions>
+                      </Dialog>
+                  </div>
+                )}
 
-              <div>
-                  <Button variant="contained" sx={{width:"200px"}} onClick={handleClickOpen}> Cancel </Button>
-                  <Dialog
-                    fullScreen={fullScreen}
-                    open={open}
-                    onClose={handleClose}
-                    aria-labelledby="responsive-dialog-title"
-                  >
-                    <DialogTitle id="responsive-dialog-title">{"Are you sure you want to delete this fundraising project?"}</DialogTitle>
-                    <DialogContent>
-                      <DialogContentText>
-                      The funds already raised will be refunded to each donors&#39; MetaMask account.
-                      Please note that this action cannot be undone.
-                      </DialogContentText>
-                    </DialogContent>
-                    <DialogActions>
-                      <Button autoFocus onClick={handleClose} color="primary">
-                        Yes
-                      </Button>
-                      <Button onClick={handleClose} color="primary" autoFocus>
-                        No
-                      </Button>
-                    </DialogActions>
-                  </Dialog>
-              </div>
+                <div>
+                    <Button variant="contained" sx={{width:"200px"}} onClick={handleOpenCancelDialog}> Cancel Fundraise </Button>
+                    <Dialog
+                      fullScreen={fullScreen}
+                      open={openCancelDialog}
+                      onClose={handleCloseCancelDialog}
+                      aria-labelledby="responsive-dialog-title"
+                    >
+                      <DialogTitle id="responsive-dialog-title">{"Are you sure you want to delete this fundraising project?"}</DialogTitle>
+                      <DialogContent>
+                        <DialogContentText>
+                        The funds already raised will be refunded to each donors&#39; MetaMask account.
+                        Please note that this action cannot be undone.
+                        </DialogContentText>
+                      </DialogContent>
+                      <DialogActions>
+                        <Button autoFocus onClick={cancelFundraise} color="primary">
+                          Yes
+                        </Button>
+                        <Button onClick={handleCloseCancelDialog} color="primary" autoFocus>
+                          No
+                        </Button>
+                      </DialogActions>
+                    </Dialog>
+                </div>
+
+                <Dialog
+                  fullScreen={fullScreen}
+                  open={isProgressOpen}
+                  onClose={() => setIsProgressOpen(false)}
+                  aria-labelledby="responsive-dialog-title"
+                >
+                  <DialogTitle id="progress-dialog-title">Transaction in Progress</DialogTitle>
+                  <DialogContent>
+                    <DialogContentText>
+                    {progressMessage}
+                    </DialogContentText>
+                  </DialogContent>
+                  <DialogActions>
+                  </DialogActions>
+                </Dialog>
+
+                </>
+                )}
+
               </Box>
             </Box>
           </ListItem>

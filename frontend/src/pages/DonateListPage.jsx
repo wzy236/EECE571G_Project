@@ -153,13 +153,10 @@ const DonateListPage = () => {
                 {!item.canceled && item.donation < item.goal && new Date() < new Date(item.deadLine * 1000) ? (
                   // if not canceled and not reached the goal and not ended
                   // show donation button
-                  <Button variant="contained" sx={{width:"200px"}} onClick={() => { navigate('/donate/' + item.fundID); }}>Donation</Button>
-                ) : item.canceled ? (
+                  <Button variant="contained" sx={{width:"200px"}} onClick={() => { navigate('/donate/' + item.fundID); }}>Donate Now</Button>
+                ) :  (
                   // show canceled button
-                  <Button variant="outlined" sx={{width:"200px"}} disabled>Fundraising Canceled</Button>
-                ) : (
-                  // show ended button
-                  <Button variant="outlined" sx={{width:"200px"}} disabled>Fundraising Ended</Button>
+                  <Button variant="outlined" sx={{width:"200px"}} disabled>Fundraising Closed</Button>
                 )}
               </Box>
             </Box>
