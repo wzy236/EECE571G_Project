@@ -180,7 +180,7 @@ const FundraisingProjectPage = () => {
                 <ProgressBar value={Math.round(item.donation/item.goal*100)} width={"60%"} />
 
                 {!item.active ? (
-                  <Button variant="outlined" sx={{width:"200px"}} disabled>Fundraising Canceled</Button>
+                  <Button variant="outlined" sx={{width:"200px"}} disabled>Fundraising Closed</Button>
                 ) :(
                   // Withdraw and Cancel button
                   <>
