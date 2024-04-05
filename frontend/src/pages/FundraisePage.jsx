@@ -140,6 +140,8 @@ const FundraisePage = () => {
                   setDate(newValue);
                 }}
                 renderInput={(params) => <TextField {...params} />}
+               //limite the date must be after now
+                disablePast
               />
             </LocalizationProvider>
           </Box>

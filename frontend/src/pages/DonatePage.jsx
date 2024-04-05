@@ -136,7 +136,7 @@ const DonatePage = () => {
               >
                 <Typography mb={3} variant="h5" textAlign={"left"}>
                   Already Raised: {fundRise.donation} <br />
-                  Number of Participant: {fundRise.donationList.length}
+                  Number of Participants: {fundRise.donationList.length}
                   <br />
                   Target Amount: {fundRise.goal} <br />
                   End Time: {unixTimeToDate(fundRise.deadLine)}

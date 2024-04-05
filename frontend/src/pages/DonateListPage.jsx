@@ -150,7 +150,7 @@ const DonateListPage = () => {
               >
                 <Typography>
                   Already Raised: {item.donation} <br />
-                  Number of Participant: {item.donationList.length}
+                  Number of Participants: {item.donationList.length}
                 </Typography>
 
                 <ProgressBar
@@ -158,7 +158,7 @@ const DonateListPage = () => {
                   width={"60%"}
                 />
 
-                {!item.canceled &&
+                {item.active &&
                 item.donation < item.goal &&
                 new Date() < new Date(item.deadLine * 1000) ? (
                   // if not canceled and not reached the goal and not ended
