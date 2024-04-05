@@ -72,6 +72,14 @@ const HomePage = () => {
           f.donation < f.goal &&
           new Date() < new Date(f.deadLine * 1000)
       );
+
+      updateFundList.sort((a, b) => { 
+        if (a.active !== b.active) {
+          return b.active - a.active; //active project is placed first
+        }
+        return a.deadLine - b.deadLine;  // The one with the earliest deadline is placed first
+      });
+      
     setFundList(updateFundList);
   };
 

@@ -59,6 +59,14 @@ const FundraisingProjectPage = () => {
       active: f.active
     }));
     console.log(updateFundRaiseList);
+
+    updateFundRaiseList.sort((a, b) => { 
+      if (a.active !== b.active) {
+        return b.active - a.active; //active project is placed first
+      }
+      return a.deadLine - b.deadLine;  // The one with the earliest deadline is placed first
+    });
+    
     setFundList(updateFundRaiseList);
   };
 
@@ -180,14 +188,14 @@ const FundraisingProjectPage = () => {
                 <ProgressBar value={Math.round(item.donation/item.goal*100)} width={"60%"} />
 
                 {!item.active ? (
-                  <Button variant="outlined" sx={{width:"200px"}} disabled>Fundraising Closed</Button>
+                  <Button variant="outlined" sx={{width:"200px", marginTop: '20px'}} disabled>Fundraising Closed</Button>
                 ) :(
                   // Withdraw and Cancel button
                   <>
                   {/* Only allow withdraw funds if goal has reached or deadline has passed */}
                   {!(item.donation < item.goal && new Date() < new Date(item.deadLine * 1000)) && (
                     <div>
-                      <Button variant="contained" sx={{width:"200px", marginBottom: '20px'}}
+                      <Button variant="contained" sx={{width:"200px", marginTop: "20px"}}
                       onClick={handleOpenWithdrawDialog}> Withdraw Funds</Button>
                       <Dialog
                         fullScreen={fullScreen}
@@ -214,7 +222,7 @@ const FundraisingProjectPage = () => {
                 )}
 
                 <div>
-                    <Button variant="contained" sx={{width:"200px"}} onClick={handleOpenCancelDialog}> Cancel Fundraise </Button>
+                    <Button variant="contained" sx={{width:"200px", marginTop: "20px"}} onClick={handleOpenCancelDialog}> Cancel Fundraise </Button>
                     <Dialog
                       fullScreen={fullScreen}
                       open={openCancelDialog}
