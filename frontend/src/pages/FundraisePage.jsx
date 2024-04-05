@@ -59,7 +59,7 @@ const FundraisePage = () => {
           Math.floor(date / 1000)
         );
       } catch (e) {
-        alert(e.data.message);
+        alert("You have already have one openning Fundraise.");
       }
     };
 
