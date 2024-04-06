@@ -8,6 +8,14 @@ import {
   Button,
   InputAdornment,
   Link,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  useMediaQuery,
+  useTheme,
+  CircularProgress
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import { unixTimeToDate } from "../utils/converter";
@@ -22,9 +30,12 @@ const DonatePage = () => {
   const { id } = useParams();
   const [fundRise, setFundRise] = useState(0);
   const [refresh, setRefresh] = useState(false);
+  const [isProgressOpen, setIsProgressOpen] = useState(false);
   const [donationList, setDonationList] = useState([]);
   const [contract, setContract] = useState();
   const navigate = useNavigate();
+  const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const { library } = useWeb3React();
 
@@ -87,6 +98,8 @@ const DonatePage = () => {
       return;
     }
 
+    setIsProgressOpen(true);
+
     try {
       const currentTime = new Date();
 
@@ -105,6 +118,7 @@ const DonatePage = () => {
       );
     }
 
+    setIsProgressOpen(false);
     alert("finished");
 
     setRefresh(true);
@@ -192,14 +206,46 @@ const DonatePage = () => {
                   }}
                 />
 
-                <Button
+                {fundRise.donation < fundRise.goal ? (
+                  // (After refresh goal might be reached, so check again)
+                  // show donation button
+                  <Button
                   variant="contained"
                   sx={{ width: "60%", height: "50px" }}
                   onClick={handleDonate}
+                  >
+                    {" "}
+                    Donate
+                  </Button>
+                ) : (
+                  // show closed button
+                  <Button
+                  variant="contained"
+                  sx={{ width: "60%", height: "50px" }}
+                  disabled
+                  >
+                    {" "}
+                    Fundraising Closed
+                  </Button>
+                )}
+
+                <Dialog
+                  fullScreen={fullScreen}
+                  open={isProgressOpen}
+                  onClose={() => setIsProgressOpen(false)}
+                  aria-labelledby="responsive-dialog-title"
                 >
-                  {" "}
-                  Donate
-                </Button>
+                  <DialogTitle id="progress-dialog-title">
+                    Transaction in Progress
+                  </DialogTitle>
+                  <DialogContent>
+                    <Box display="flex" justifyContent="center" alignItems="center" minHeight="50px">
+                      <CircularProgress />
+                    </Box>
+                    <DialogContentText>Processing your donation...Please wait.</DialogContentText>
+                  </DialogContent>
+                  <DialogActions></DialogActions>
+                </Dialog>
               </Box>
             </Box>
           </Box>

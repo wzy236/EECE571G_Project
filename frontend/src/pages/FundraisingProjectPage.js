@@ -14,13 +14,13 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  CircularProgress,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { ProgressBar } from "../component/Progress";
 import TrustableFundArtifact from "../contracts/TrustableFund.sol/TrustableFund.json";
 import { useWeb3React } from "@web3-react/core";
 import { ethers } from "ethers";
-import { unixTimeToDate } from "./DonateListPage";
 
 const FundraisingProjectPage = () => {
   const { library } = useWeb3React();
@@ -365,6 +365,9 @@ const FundraisingProjectPage = () => {
                         Transaction in Progress
                       </DialogTitle>
                       <DialogContent>
+                        <Box display="flex" justifyContent="center" alignItems="center" minHeight="50px">
+                          <CircularProgress />
+                        </Box>
                         <DialogContentText>{progressMessage}</DialogContentText>
                       </DialogContent>
                       <DialogActions></DialogActions>
