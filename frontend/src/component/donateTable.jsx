@@ -10,10 +10,10 @@ import TableRow from "@mui/material/TableRow";
 import { ethers } from "ethers";
 
 const columns = [
-  { id: "donator", label: "donator", minWidth: 170 },
+  { id: "donator", label: "Donator", minWidth: 170 },
   {
     id: "transAmount",
-    label: "amount",
+    label: "Amount",
     minWidth: 170,
     align: "center",
     format: (value) => parseFloat(ethers.utils.formatEther(value)),
