@@ -15,7 +15,7 @@ import {
   Divider,
   Link,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { ProgressBar } from "../component/Progress";
 import TrustableFundArtifact from "../contracts/TrustableFund.sol/TrustableFund.json";
 import { useWeb3React } from "@web3-react/core";
@@ -130,6 +130,9 @@ const DonateListPage = () => {
             key={item.id}
             sx={{ height: "250px", alignItems: "center" }}
             divider={true}
+            component={RouterLink}
+            to={`/donate/${item.fundID}`}
+            style={{ textDecoration: 'none', color: 'inherit' }}
           >
             <Box
               sx={{
@@ -202,8 +205,6 @@ const DonateListPage = () => {
                   // show canceled button
                   <Button variant="outlined" sx={{ width: "60%" }} disabled>
                     Fundraising closed
-                    {/* { item.active?
-                    "Fundraising completed":"Fundraising closed"} */}
                   </Button>
                 )}
               </Box>

@@ -207,8 +207,9 @@ const DonatePage = () => {
                   }}
                 />
 
-                {fundRise.donation < fundRise.goal ? (
-                  // (After refresh goal might be reached, so check again)
+                {fundRise.active &&
+                fundRise.donation < fundRise.goal &&
+                new Date() < new Date(fundRise.deadLine * 1000) ? (
                   // show donation button
                   <Button
                   variant="contained"
