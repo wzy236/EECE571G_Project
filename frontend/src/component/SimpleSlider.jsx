@@ -15,7 +15,7 @@ function SimpleSlider() {
       <Slider {...settings}>
         <div className="image">
           <img
-            src="https://cdn-ekgnfp.nitrocdn.com/gMFIgmWdNkOLwhUvhKKtvlsxEXvVjDAi/assets/images/optimized/rev-70b5251/thinkaccounting.ca/wp-content/uploads/balloons-charity-colorful-1409716-e1566092247570-1.jpg"
+            src="https://github.com/wzy236/EECE571G_Project/blob/main/frontend/src/images/trustfundhomepage1.png?raw=true"
             alt="Image 1"
             style={{ width: "100%", height: "100%" }}
           />
@@ -23,7 +23,7 @@ function SimpleSlider() {
         </div>
         <div className="image">
           <img
-            src="https://cdn-ekgnfp.nitrocdn.com/gMFIgmWdNkOLwhUvhKKtvlsxEXvVjDAi/assets/images/optimized/rev-70b5251/thinkaccounting.ca/wp-content/uploads/balloons-charity-colorful-1409716-e1566092247570-1.jpg"
+            src="https://img.freepik.com/free-photo/donate-sign-charity-campaign_53876-127165.jpg"
             alt="Image 2"
             style={{ width: "100%", height: "100%" }}
           />
