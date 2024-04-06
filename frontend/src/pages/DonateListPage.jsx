@@ -69,7 +69,22 @@ const DonateListPage = () => {
 
     updateFundList.sort((a, b) => { 
       if (a.active !== b.active) {
+        //if one is active but is expired or reached the goal, it will sort with inactive ones
+        if(a.active && (a.donation >= a.goal || new Date() > new Date(a.deadLine * 1000))){ 
+          return a.deadLine - b.deadLine; 
+        }
+        if(b.active && (b.donation >= b.goal || new Date() > new Date(b.deadLine * 1000))){
+          return a.deadLine - b.deadLine; 
+        }
         return b.active - a.active; //active project is placed first
+      }
+      if (a.active && b.active) {   //if both active, but one project has already reached the goal or expired
+        if(a.donation >= a.goal || new Date() > new Date(a.deadLine * 1000)){
+          return 1; 
+        }
+        if(b.donation >= b.goal || new Date() > new Date(b.deadLine * 1000)){
+          return -1; 
+        }
       }
       return a.deadLine - b.deadLine;  // The one with the earliest deadline is placed first
     });
@@ -161,7 +176,7 @@ const DonateListPage = () => {
               >
                 <Typography>
                   Already Raised: {item.donation} <br />
-                  Number of Participants: {item.donationList.length}
+                  Number of Donations: {item.donationList.length}
                 </Typography>
 
                 <ProgressBar
@@ -186,7 +201,9 @@ const DonateListPage = () => {
                 ) : (
                   // show canceled button
                   <Button variant="outlined" sx={{ width: "60%" }} disabled>
-                    Fundraising Closed
+                    Fundraising closed
+                    {/* { item.active?
+                    "Fundraising completed":"Fundraising closed"} */}
                   </Button>
                 )}
               </Box>
