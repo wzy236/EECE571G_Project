@@ -136,6 +136,7 @@ const DonatePage = () => {
               onClick={() => {
                 navigate("/donate/" + fundRise.fundID);
               }}
+              sx={{fontWeight:"bold"}}
             >
               {fundRise.storyTitle}
             </Typography>
@@ -171,7 +172,7 @@ const DonatePage = () => {
                     marginBottom: "25px",
                   }}
                 >
-                  <Typography variant="h8" textAlign={"left"} mb="1rem">
+                  <Typography variant="h6" textAlign={"left"} mb="1rem">
                     Already Raised: {fundRise.donation} <br />
                     Number of Donations: {fundRise.donationList.length}
                     <br />
@@ -257,15 +258,15 @@ const DonatePage = () => {
             }}
             mb={"50px"}
           >
-            <Typography variant="h5" textAlign={"left"} mb={3}>
+            <Typography variant="h5" textAlign={"left"} mb={3} sx={{fontWeight:"bold"}}>
               Fundraising Details
             </Typography>
-            <Typography textAlign={"left"} mb={3}>
+            <Typography variant="h6" textAlign={"left"} mb={3}>
               {fundRise.storyText}
             </Typography>
           </Box>
           <Box>
-            <Typography variant="h5" textAlign={"left"} mb={3}>
+            <Typography variant="h5" textAlign={"left"} mb={3} sx={{fontWeight:"bold"}}>
               Donation History
             </Typography>
             <DonationTable data={donationList} />

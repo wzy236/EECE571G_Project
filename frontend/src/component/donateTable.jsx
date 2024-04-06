@@ -10,7 +10,11 @@ import TableRow from "@mui/material/TableRow";
 import { ethers } from "ethers";
 
 const columns = [
-  { id: "donator", label: "Donator", minWidth: 170 },
+  { id: "donator", 
+  label: "Donator", 
+  minWidth: 170,
+  align: "center",
+  },
   {
     id: "transAmount",
     label: "Amount",
@@ -22,7 +26,7 @@ const columns = [
     id: "time",
     label: "Donation Date",
     minWidth: 170,
-    align: "right",
+    align: "center",
     format: (value) => value.slice(0, 10),
   },
 ];
