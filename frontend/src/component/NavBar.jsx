@@ -58,12 +58,12 @@ const NavBar = () => {
         flexGrow: 1,
       }}
     >
-      <AppBar position="static">
+      <AppBar position="static"  sx={{ bgcolor: "black" }} >
         <Toolbar variant="dense">
           <img
-            src="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
+            src="https://github.com/wzy236/EECE571G_Project/blob/main/frontend/src/images/image-logo-new.png?raw=true"
+            width="80"
+            height="64"
             alt="TrustFund"
           />
           <Box flex="1" align="left">
