@@ -185,7 +185,7 @@ const FundraisingProjectPage = () => {
         {fundRaiseList.map((item) => (
           <ListItem
             key={item.id}
-            sx={{ height: "250px", alignItems: "center" }}
+            sx={{ height: "300px", alignItems: "center" }}
             divider={true}
           >
             <Box
@@ -200,7 +200,7 @@ const FundraisingProjectPage = () => {
                 src={item.imageurl}
                 style={{
                   width: "100%",
-                  maxHeight: "200px",
+                  maxHeight: "250px",
                   objectFit: "cover",
                   my: "auto",
                 }}
@@ -240,11 +240,7 @@ const FundraisingProjectPage = () => {
                 />
 
                 {!item.active ? (
-                  <Button
-                    variant="outlined"
-                    sx={{ width: "60%", marginTop: "20px" }}
-                    disabled
-                  >
+                  <Button variant="outlined" sx={{ width: "60%" }} disabled>
                     Fundraising Closed
                   </Button>
                 ) : (
@@ -255,13 +251,20 @@ const FundraisingProjectPage = () => {
                       item.donation < item.goal &&
                       new Date() < new Date(item.deadLine * 1000)
                     ) && (
-                      <div>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          width: "100%",
+                          flexDirection: "column",
+                        }}
+                      >
                         <Button
                           variant="contained"
-                          sx={{ width: "60%", marginBottom: "20px" }}
+                          sx={{ width: "60%", marginTop: "20px" }}
                           onClick={handleOpenWithdrawDialog}
                         >
-                          {" "}
                           Withdraw Funds
                         </Button>
                         <Dialog
@@ -296,17 +299,24 @@ const FundraisingProjectPage = () => {
                             </Button>
                           </DialogActions>
                         </Dialog>
-                      </div>
+                      </Box>
                     )}
 
-                    <div>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        width: "100%",
+                        padding: "20px",
+                        alignItems: "center",
+                        flexDirection: "column",
+                      }}
+                    >
                       <Button
                         variant="contained"
-                        sx={{ width: "200px" }}
+                        sx={{ width: "60%" }}
                         onClick={handleOpenCancelDialog}
                       >
-                        {" "}
-                        Cancel Fundraise{" "}
+                        Cancel Fundraise
                       </Button>
                       <Dialog
                         fullScreen={fullScreen}
@@ -343,7 +353,7 @@ const FundraisingProjectPage = () => {
                           </Button>
                         </DialogActions>
                       </Dialog>
-                    </div>
+                    </Box>
 
                     <Dialog
                       fullScreen={fullScreen}
