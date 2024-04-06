@@ -7,6 +7,7 @@ import {
   Typography,
   Button,
   InputAdornment,
+  Link,
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import { unixTimeToDate } from "../utils/converter";
@@ -23,6 +24,7 @@ const DonatePage = () => {
   const [refresh, setRefresh] = useState(false);
   const [donationList, setDonationList] = useState([]);
   const [contract, setContract] = useState();
+  const navigate = useNavigate();
 
   const { library } = useWeb3React();
 
@@ -112,8 +114,15 @@ const DonatePage = () => {
     <Container sx={{ maxWidth: "80%", textAlign: "center", marginTop: "50px" }}>
       {fundRise ? (
         <>
-          <Box mb={"100px"}>
-            <Typography variant="h4" textAlign={"left"} mb={5}>
+          <Box mb={"50px"}>
+            <Typography
+              variant="h4"
+              textAlign={"left"}
+              mb={5}
+              onClick={() => {
+                navigate("/donate/" + fundRise.fundID);
+              }}
+            >
               {fundRise.storyTitle}
             </Typography>
 
@@ -124,28 +133,45 @@ const DonatePage = () => {
                 justifyContent: "space-between",
               }}
             >
-              <img src={fundRise.imageurl} style={{ width: "60%" }} />
+              <img
+                src={fundRise.imageurl}
+                style={{ width: "60%", maxWidth: "400px" }}
+              />
               <Box
                 sx={{
                   display: "flex",
-                  justifyContent: "center",
+                  justifyContent: "space-between",
                   alignItems: "center",
                   flexDirection: "column",
-                  width: "40%",
+                  // padding: "20px",
+                  width: "50%",
                 }}
               >
-                <Typography mb={3} variant="h5" textAlign={"left"}>
-                  Already Raised: {fundRise.donation} <br />
-                  Number of Participants: {fundRise.donationList.length}
-                  <br />
-                  Target Amount: {fundRise.goal} <br />
-                  End Time: {unixTimeToDate(fundRise.deadLine)}
-                </Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    width: "100%",
+                    marginBottom: "25px",
+                  }}
+                >
+                  <Typography variant="h8" textAlign={"left"}>
+                    Already Raised: {fundRise.donation} <br />
+                    Number of Participants: {fundRise.donationList.length}
+                    <br />
+                    Target Amount: {fundRise.goal} <br />
+                    End Time: {unixTimeToDate(fundRise.deadLine)}
+                  </Typography>
 
-                <ProgressBar
-                  value={Math.round((fundRise.donation / fundRise.goal) * 100)}
-                  width={"60%"}
-                />
+                  <ProgressBar
+                    value={Math.round(
+                      (fundRise.donation / fundRise.goal) * 100
+                    )}
+                    width={"60%"}
+                  />
+                </Box>
 
                 <TextField
                   id="outlined-adornment-weight"
@@ -158,12 +184,17 @@ const DonatePage = () => {
                       <InputAdornment position="start">ETH</InputAdornment>
                     ),
                   }}
-                  sx={{ marginBottom: "30px", width: "40%" }}
+                  sx={{
+                    marginTop: "30px",
+                    marginBottom: "30px",
+                    width: "60%",
+                    height: "50px",
+                  }}
                 />
 
                 <Button
                   variant="contained"
-                  sx={{ width: "300px", height: "70px" }}
+                  sx={{ width: "60%", height: "50px" }}
                   onClick={handleDonate}
                 >
                   {" "}
@@ -174,19 +205,24 @@ const DonatePage = () => {
           </Box>
           <Box
             sx={{
-              display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
               alignItems: "start",
             }}
             mb={"50px"}
           >
-            <Typography variant="h6" textAlign={"left"} mb={5}>
+            <Typography variant="h5" textAlign={"left"} mb={3}>
+              Fundraising Details
+            </Typography>
+            <Typography textAlign={"left"} mb={3}>
               {fundRise.storyText}
             </Typography>
-            <Box sx={{ width: "800px" }}>
-              <DonationTable data={donationList} />
-            </Box>
+          </Box>
+          <Box>
+            <Typography variant="h5" textAlign={"left"} mb={3}>
+              Donation History
+            </Typography>
+            <DonationTable data={donationList} />
           </Box>
         </>
       ) : (

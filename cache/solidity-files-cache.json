@@ -1,9 +1,9 @@
 {
   "_format": "hh-sol-cache-2",
   "files": {
-    "/home/richard/EECE571G_Project/contracts/TrustableFund.sol": {
-      "lastModificationDate": 1711163607540,
-      "contentHash": "8c4b5365ad835f6261a8a4353cb2eeb2",
+    "/Users/yule/Documents/Master-study/2023W-Term2/EECE571G/EECE571G_Project/contracts/TrustableFund.sol": {
+      "lastModificationDate": 1712284724408,
+      "contentHash": "c7fbf070545a2d9862a6a37a4ac25ef5",
       "sourceName": "contracts/TrustableFund.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -20,7 +20,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ],
               "": [
                 "ast"

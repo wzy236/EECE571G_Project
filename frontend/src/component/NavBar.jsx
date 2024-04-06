@@ -92,7 +92,7 @@ const NavBar = () => {
               <LinkTab label="Home Page" to="/" />
               <LinkTab label="Donate" to="/donate" />
               <LinkTab label="Fundraise" to="/fundraise" />
-              <LinkTab label="Donate History" to="/donatehistory" />
+              <LinkTab label="Donation History" to="/donatehistory" />
               <LinkTab label="Fundraising Project" to="/fundraisingproject" />
             </Tabs>
           </Box>

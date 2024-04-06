@@ -13,6 +13,7 @@ import {
   LinearProgress,
   Button,
   Divider,
+  Link,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { ProgressBar } from "../component/Progress";
@@ -140,7 +141,9 @@ const DonateListPage = () => {
                   flexDirection: "column",
                 }}
               >
-                <Typography variant="h5">{item.storyTitle}</Typography>
+                <Typography to={"/donate/" + item.fundID} variant="h5">
+                  {item.storyTitle}
+                </Typography>
                 <Typography variant="h7">
                   Target Amount: {item.goal} <br />
                   End Date: {unixTimeToDate(item.deadLine)}
