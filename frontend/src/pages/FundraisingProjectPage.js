@@ -39,7 +39,9 @@ const FundraisingProjectPage = () => {
 
   const [refresh, setRefresh] = useState(false);
 
-  const address = "0x4AfEC11A9E24462E87cf33D8CB3C5f2B69018166";
+  //use the old address to test 0x4C613BC930360fb932379286b033CDe2329DC75F
+  //new one: 0x4AfEC11A9E24462E87cf33D8CB3C5f2B69018166
+  const address = "0x4AfEC11A9E24462E87cf33D8CB3C5f2B69018166"; 
 
   useEffect(() => {
     if (!library) {
