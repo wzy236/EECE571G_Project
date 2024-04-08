@@ -10,6 +10,13 @@ function SimpleSlider() {
     slidesToShow: 1,
     slidesToScroll: 1,
   };
+
+  const imageStyle = {
+    maxWidth: "70%",
+    maxHeight: "70%",
+    margin: "auto"
+  }
+
   return (
     <div className="slider-container">
       <Slider {...settings}>
@@ -17,7 +24,7 @@ function SimpleSlider() {
           <img
             src="https://github.com/wzy236/EECE571G_Project/blob/main/frontend/src/images/trustfundhomepage1.png?raw=true"
             alt="Image 1"
-            style={{ width: "100%", height: "100%" }}
+            style={imageStyle}
           />
           <h3></h3>
         </div>
@@ -25,7 +32,7 @@ function SimpleSlider() {
           <img
             src="https://github.com/wzy236/EECE571G_Project/blob/main/frontend/src/images/trustfundhomepage2.png?raw=true"
             alt="Image 2"
-            style={{ width: "100%", height: "100%" }}
+            style={imageStyle}
           />
           <h3></h3>
         </div>
@@ -33,7 +40,7 @@ function SimpleSlider() {
           <img
             src="https://github.com/wzy236/EECE571G_Project/blob/main/frontend/src/images/trustfundhomepage3.png?raw=true"
             alt="Image 3"
-            style={{ width: "100%", height: "100%" }}
+            style={imageStyle}
           />
           <h3></h3>
         </div>
