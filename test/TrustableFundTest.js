@@ -22,8 +22,8 @@ describe("TrustableFund Contract", function () {
     return { TrustableFundTestCase, addr0, addr1, addr2 };
   }
 
-  describe("Create a fundraise", function () {
-    it("Should successfully publish a fundraise", async function () {
+  describe("Initiate a fundraising project", function () {
+    it("Should successfully publish a fundraising project", async function () {
       let { TrustableFundTestCase, addr0 } = await loadFixture(
         deployTokenFixture
       );
@@ -61,7 +61,7 @@ describe("TrustableFund Contract", function () {
       expect(newFundHistoryLength).to.equal(initialFundHistroyLength + 1);
     });
 
-    it("Shouldn't create a new fundraise for the user who has one in the progress", async function () {
+    it("Shouldn't create a new fundraising project for the user who has one in the progress", async function () {
       let { TrustableFundTestCase, addr0 } = await loadFixture(
         deployTokenFixture
       );
@@ -103,8 +103,8 @@ describe("TrustableFund Contract", function () {
     });
   });
 
-  describe("Donate to a fundraise", function () {
-    it("Should successfully donate to a fundraise", async function () {
+  describe("Donate to a fundraising project", function () {
+    it("Should successfully donate to a fundraising project", async function () {
       let { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(
         deployTokenFixture
       );
@@ -158,7 +158,7 @@ describe("TrustableFund Contract", function () {
       expect(fundraiseAfter.donationList[0]).to.equal(0);
     });
 
-    it("Shouldn't donate to a fundraise that is cancelled", async function () {
+    it("Shouldn't donate to a fundraising project that is cancelled", async function () {
       let { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(
         deployTokenFixture
       );
@@ -262,7 +262,7 @@ describe("TrustableFund Contract", function () {
     });
   });
 
-  describe("Withdraw from a fundraise", function () {
+  describe("Withdraw from a fundraising project", function () {
     it("Should allow the fundraiser to withdraw once goal has reached", async function () {
       let { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(
         deployTokenFixture
@@ -329,7 +329,7 @@ describe("TrustableFund Contract", function () {
       expect(fundraise.active).to.equal(false);
     });
 
-    it("Should allow the fundraiser to widthdraw once deadline passed", async function () {
+    it("Should allow the fundraiser to withdraw once deadline passed", async function () {
       let { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(
         deployTokenFixture
       );
@@ -559,8 +559,8 @@ describe("TrustableFund Contract", function () {
     });
   });
 
-  describe("Cancel a existed fundraise", function () {
-    it("Shouldn't allow the fundraiser to cancel once fundraise is closed/inactive", async function () {
+  describe("Cancel a existed fundraising project", function () {
+    it("Shouldn't allow the fundraiser to cancel once fundraising project was withdrawn/inactive", async function () {
       let { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(
         deployTokenFixture
       );
@@ -596,7 +596,45 @@ describe("TrustableFund Contract", function () {
       ).to.be.revertedWith("The money has already been withdrawn");
     });
 
-    it("Should allow the fundraiser to cancel the fundraise and return the funds from smart contract", async function () {
+    it("Shouldn't allow the fundraiser to cancel once fundraising project was cancelled/inactive", async function () {
+      let { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(
+        deployTokenFixture
+      );
+
+      // Addr0 create a new fundraise
+      await TrustableFundTestCase.connect(addr0).publishFundraise(
+        ethers.parseEther("100"),
+        "Test Fundraise Title",
+        "Test Fundraise Story Text",
+        "The image should be in the format of base64",
+        Math.floor(Date.now() / 1000) + 86400 // timestamp is in seconds
+        // set ddl 1 day after the creating time for testing
+      );
+
+      const fundId = (await TrustableFundTestCase.getFundList())[0].length - 1;
+
+      // Addr1 donates to the fundraise created by addr0, meeting the goal
+      const donationAmount = ethers.parseEther("100");
+      await TrustableFundTestCase.connect(addr1).donation(
+        fundId,
+        "2024-01-01T12:00:00Z",
+        { value: donationAmount }
+      );
+
+      // Addr0 cancels the project, now fundraise becomes inactive
+      await TrustableFundTestCase.connect(addr0).cancelFundraise(
+        "Math.floor(Date.now() / 1000)"
+      );
+
+      // Addr0 trys to cancel this fundraise but should fail
+      await expect(
+        TrustableFundTestCase.connect(addr0).cancelFundraise(
+          "Math.floor(Date.now() / 1000)"
+        )
+      ).to.be.revertedWith("The money has already been withdrawn");
+    });
+
+    it("Should allow the fundraiser to cancel the fundraising project and return the funds from smart contract", async function () {
       let { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(
         deployTokenFixture
       );
@@ -700,7 +738,7 @@ describe("TrustableFund Contract", function () {
       expect(fundtitle2).to.equal("Test Fundraise Title2");
     });
 
-    it("Fail to get the fund title for a non-existed fundID", async function () {
+    it("Should fail to get the fund title for a non-existed fundID", async function () {
       let { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(
         deployTokenFixture
       );
