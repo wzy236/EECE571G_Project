@@ -101,6 +101,9 @@ const FundraisePage = () => {
     setIsProgressOpen(true);
   
     try {
+      if(ethers.utils.parseEther(amount).isZero()){
+        alert("Your target amount should preferably be greater than zero. You can reject this time and post again after changing your target value!");
+      }
       const txn = await contract.publishFundraise(
         ethers.utils.parseEther(amount),
         title,
@@ -121,7 +124,7 @@ const FundraisePage = () => {
       }
       
     } catch (e) {
-      alert("You have already have one openning Fundraise.");
+      alert("You failed to create a new Fundraise. Please check if you have already have one openning Fundraise or if you don't finish the form yet. And please make sure you need to click 'Confirm' button in the MetaMask.");
     } finally {
       setIsProgressOpen(false);
     }    
