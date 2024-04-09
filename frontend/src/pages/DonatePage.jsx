@@ -15,7 +15,7 @@ import {
   DialogTitle,
   useMediaQuery,
   useTheme,
-  CircularProgress
+  CircularProgress,
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import { unixTimeToDate } from "../utils/converter";
@@ -136,7 +136,7 @@ const DonatePage = () => {
               onClick={() => {
                 navigate("/donate/" + fundRise.fundID);
               }}
-              sx={{fontWeight:"bold"}}
+              sx={{ fontWeight: "bold" }}
             >
               {fundRise.storyTitle}
             </Typography>
@@ -212,9 +212,9 @@ const DonatePage = () => {
                 new Date() < new Date(fundRise.deadLine * 1000) ? (
                   // show donation button
                   <Button
-                  variant="contained"
-                  sx={{ width: "60%", height: "50px" }}
-                  onClick={handleDonate}
+                    variant="contained"
+                    sx={{ width: "60%", height: "50px" }}
+                    onClick={handleDonate}
                   >
                     {" "}
                     Donate
@@ -222,9 +222,9 @@ const DonatePage = () => {
                 ) : (
                   // show closed button
                   <Button
-                  variant="contained"
-                  sx={{ width: "60%", height: "50px" }}
-                  disabled
+                    variant="contained"
+                    sx={{ width: "60%", height: "50px" }}
+                    disabled
                   >
                     {" "}
                     Fundraising Closed
@@ -241,10 +241,17 @@ const DonatePage = () => {
                     Transaction in Progress
                   </DialogTitle>
                   <DialogContent>
-                    <Box display="flex" justifyContent="center" alignItems="center" minHeight="50px">
+                    <Box
+                      display="flex"
+                      justifyContent="center"
+                      alignItems="center"
+                      minHeight="50px"
+                    >
                       <CircularProgress />
                     </Box>
-                    <DialogContentText>Processing your donation...Please wait.</DialogContentText>
+                    <DialogContentText>
+                      Processing your donation...Please wait.
+                    </DialogContentText>
                   </DialogContent>
                   <DialogActions></DialogActions>
                 </Dialog>
@@ -259,15 +266,25 @@ const DonatePage = () => {
             }}
             mb={"50px"}
           >
-            <Typography variant="h5" textAlign={"left"} mb={3} sx={{fontWeight:"bold"}}>
+            <Typography
+              variant="h5"
+              textAlign={"left"}
+              mb={3}
+              sx={{ fontWeight: "bold" }}
+            >
               Fundraising Details
             </Typography>
             <Typography variant="h6" textAlign={"left"} mb={3}>
               {fundRise.storyText}
             </Typography>
           </Box>
-          <Box>
-            <Typography variant="h5" textAlign={"left"} mb={3} sx={{fontWeight:"bold"}}>
+          <Box mb={3}>
+            <Typography
+              variant="h5"
+              textAlign={"left"}
+              mb={3}
+              sx={{ fontWeight: "bold" }}
+            >
               Donation History
             </Typography>
             <DonationTable data={donationList} />
