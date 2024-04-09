@@ -125,19 +125,42 @@ describe("TrustableFund Contract", function () {
       )[0].find((f) => f.fundID === BigInt(fundId));
       const donationTotalBefore = fundraiseBefore.donation;
 
-      // Addr2 donate
-      const donationAmount = ethers.parseEther("1");
+      //Addr0 donate, this time, just test if the event is succefully emitd
+      const donationAmount1 = ethers.parseEther("1");
       await expect(
-        TrustableFundTestCase.connect(addr2).donation(
+         TrustableFundTestCase.connect(addr0).donation(
           fundId,
           "2024-01-01T12:00:00Z",
           {
-            value: donationAmount,
+            value: donationAmount1,
           }
         )
       )
         .to.emit(TrustableFundTestCase, "DonateSuccess")
-        .withArgs(fundId, 0, donationAmount);
+        .withArgs(fundId, 0, donationAmount1);
+
+      // Check addr2, smart contract's balance before donating
+      const addr2BalanceBefore = await ethers.provider.getBalance(
+        addr2.address
+      );
+      const contractBalanceBefore = await ethers.provider.getBalance(
+        TrustableFundTestCase.getAddress()
+      );
+
+      // Addr2 donate
+      const donationAmount2 = ethers.parseEther("2");
+      const tx = await
+         TrustableFundTestCase.connect(addr2).donation(
+          fundId,
+          "2024-01-01T12:00:00Z",
+          {
+            value: donationAmount2,
+          }
+        );
+     
+
+        const receipt = await tx.wait();
+        const gasUsed = receipt.gasUsed * receipt.gasPrice;
 
       // Check Addr2's donation history is correctly updated
       const donationList = (
@@ -146,16 +169,26 @@ describe("TrustableFund Contract", function () {
       const donation = donationList.find(
         (d) => d.fundID === BigInt(fundId) && d.time === "2024-01-01T12:00:00Z"
       );
-      expect(donation.transAmount).to.equal(donationAmount);
+      expect(donation.transAmount).to.equal(donationAmount2);
 
       // Check if the donation amount is correctly added to the fundraise
       const fundraiseAfter = (
         await TrustableFundTestCase.getFundList()
       )[0].find((f) => f.fundID === BigInt(fundId));
       const donationTotalAfter = fundraiseAfter.donation;
-      expect(donationTotalAfter - donationTotalBefore).to.equal(donationAmount);
+      expect(donationTotalAfter - donationTotalBefore).to.equal(donationAmount1 + donationAmount2);
       // Check if the donation id is correctly kept in the fundraise
       expect(fundraiseAfter.donationList[0]).to.equal(0);
+      // Check addr2, smart contract's balance after donating
+      const addr2BalanceAfter = await ethers.provider.getBalance(
+        addr2.address
+      );
+      const contractBalanceAfter= await ethers.provider.getBalance(
+        TrustableFundTestCase.getAddress()
+      );
+      // Check if the change is equal to the donationamount by add2's donation
+      expect(addr2BalanceBefore - addr2BalanceAfter - gasUsed).to.equal(donationAmount2);
+      expect(contractBalanceAfter - contractBalanceBefore).to.equal(donationAmount2);
     });
 
     it("Shouldn't donate to a fundraising project that is cancelled", async function () {
@@ -260,6 +293,8 @@ describe("TrustableFund Contract", function () {
         fundraiseBefore.donationList.length
       );
     });
+    
+
   });
 
   describe("Withdraw from a fundraising project", function () {
@@ -588,12 +623,34 @@ describe("TrustableFund Contract", function () {
       // Addr0 withdraws the funds, now fundraise becomes inactive
       await TrustableFundTestCase.connect(addr0).withdrawFundraise();
 
+      // Check balances before cancelling
+      let addr1BalanceBefore = await ethers.provider.getBalance(addr1.address);
+      let addr0BalanceBefore = await ethers.provider.getBalance(addr0.address);
+      let contractBalanceBefore = await ethers.provider.getBalance(
+            TrustableFundTestCase.getAddress()
+        );
+
       // Addr0 trys to cancel this fundraise but should fail
       await expect(
         TrustableFundTestCase.connect(addr0).cancelFundraise(
           "Math.floor(Date.now() / 1000)"
         )
       ).to.be.revertedWith("The money has already been withdrawn");
+
+      // Check balances after cancelling (failed)
+      let addr1BalanceAfter = await ethers.provider.getBalance(addr1.address);
+      let addr0BalanceAfter = await ethers.provider.getBalance(addr0.address);
+      let contractBalanceAfter = await ethers.provider.getBalance(
+        TrustableFundTestCase.getAddress()
+      );
+
+      // Check if the contract balance reamins unchanged before and after the failed cancel
+      expect(contractBalanceAfter).to.equal(contractBalanceBefore);
+      // Check if the add0 balance is less than before due to the gas price
+      expect(addr0BalanceAfter).to.lessThan(addr0BalanceBefore);
+     // Check if the add1 balance reamins unchanged before and after the failed cancel
+      expect(addr1BalanceAfter).to.equal(addr1BalanceBefore);
+
     });
 
     it("Shouldn't allow the fundraiser to cancel once fundraising project was cancelled/inactive", async function () {
@@ -621,17 +678,39 @@ describe("TrustableFund Contract", function () {
         { value: donationAmount }
       );
 
+
       // Addr0 cancels the project, now fundraise becomes inactive
       await TrustableFundTestCase.connect(addr0).cancelFundraise(
         "Math.floor(Date.now() / 1000)"
       );
 
+      // Check balances before failed cancelling
+      let addr1BalanceBefore = await ethers.provider.getBalance(addr1.address);
+      let addr0BalanceBefore = await ethers.provider.getBalance(addr0.address);
+      let contractBalanceBefore = await ethers.provider.getBalance(
+            TrustableFundTestCase.getAddress()
+      );
       // Addr0 trys to cancel this fundraise but should fail
       await expect(
         TrustableFundTestCase.connect(addr0).cancelFundraise(
           "Math.floor(Date.now() / 1000)"
         )
       ).to.be.revertedWith("The money has already been withdrawn");
+
+      // Check balances after cancelling (failed)
+      let addr1BalanceAfter = await ethers.provider.getBalance(addr1.address);
+      let addr0BalanceAfter = await ethers.provider.getBalance(addr0.address);
+      let contractBalanceAfter = await ethers.provider.getBalance(
+        TrustableFundTestCase.getAddress()
+      );
+
+      // Check if the contract balance reamins unchanged before and after the failed cancel
+      expect(contractBalanceAfter).to.equal(contractBalanceBefore);
+      // Check if the add0 balance is less than before due to the gas price
+      expect(addr0BalanceAfter).to.lessThan(addr0BalanceBefore);
+     // Check if the add1 balance reamins unchanged before and after the failed cancel
+      expect(addr1BalanceAfter).to.equal(addr1BalanceBefore);
+
     });
 
     it("Should allow the fundraiser to cancel the fundraising project and return the funds from smart contract", async function () {
@@ -694,10 +773,17 @@ describe("TrustableFund Contract", function () {
       expect(contractBalanceBefore - contractBalanceAfter).to.equal(
         donationAmount1 + donationAmount2
       );
+
+     // Check if the fundraise is inactive after cancellation
+      fundraise = (await TrustableFundTestCase.getFundList())[0].find(
+        (f) => f.fundID === BigInt(fundId)
+      );
+      expect(fundraise.active).to.equal(false);
+
     });
   });
 
-  describe("Get fund title for existed fund ID", function () {
+  describe("Get fund title for existing fund ID", function () {
     it("Should get the right title for the given fundID", async function () {
       let { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(
         deployTokenFixture
@@ -738,7 +824,7 @@ describe("TrustableFund Contract", function () {
       expect(fundtitle2).to.equal("Test Fundraise Title2");
     });
 
-    it("Should fail to get the fund title for a non-existed fundID", async function () {
+    it("Should fail to get the fund title for a non-existent fundID", async function () {
       let { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(
         deployTokenFixture
       );
