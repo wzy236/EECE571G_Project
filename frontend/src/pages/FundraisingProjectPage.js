@@ -233,7 +233,7 @@ const FundraisingProjectPage = () => {
               >
                 <Typography>
                   Already Raised: {item.donation} <br />
-                  Number of Participants: {item.donationList.length}
+                  Number of Donations: {item.donationList.length}
                 </Typography>
 
                 <ProgressBar
