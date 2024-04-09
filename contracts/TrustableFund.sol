@@ -76,7 +76,7 @@ contract TrustableFund {
         // active fund
         require(
             fundList[latestID].active == true,
-            "The money has already been withdrawn"
+            "The money has already been withdrawn or cancelled"
         );
         _;
     }

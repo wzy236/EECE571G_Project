@@ -594,7 +594,7 @@ describe("TrustableFund Contract", function () {
     });
   });
 
-  describe("Cancel a existed fundraising project", function () {
+  describe("Cancel a existing fundraising project", function () {
     it("Shouldn't allow the fundraiser to cancel once fundraising project was withdrawn/inactive", async function () {
       let { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(
         deployTokenFixture
@@ -635,7 +635,7 @@ describe("TrustableFund Contract", function () {
         TrustableFundTestCase.connect(addr0).cancelFundraise(
           "Math.floor(Date.now() / 1000)"
         )
-      ).to.be.revertedWith("The money has already been withdrawn");
+      ).to.be.revertedWith("The money has already been withdrawn or cancelled");
 
       // Check balances after cancelling (failed)
       let addr1BalanceAfter = await ethers.provider.getBalance(addr1.address);
@@ -695,7 +695,7 @@ describe("TrustableFund Contract", function () {
         TrustableFundTestCase.connect(addr0).cancelFundraise(
           "Math.floor(Date.now() / 1000)"
         )
-      ).to.be.revertedWith("The money has already been withdrawn");
+      ).to.be.revertedWith("The money has already been withdrawn or cancelled");
 
       // Check balances after cancelling (failed)
       let addr1BalanceAfter = await ethers.provider.getBalance(addr1.address);
@@ -712,6 +712,61 @@ describe("TrustableFund Contract", function () {
       expect(addr1BalanceAfter).to.equal(addr1BalanceBefore);
 
     });
+
+    it("Shouldn't allow the user to cancel others' fundraising project", async function () {
+        let { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(
+          deployTokenFixture
+        );
+  
+        // Addr0 create a new fundraise
+        await TrustableFundTestCase.connect(addr0).publishFundraise(
+          ethers.parseEther("100"),
+          "Test Fundraise Title",
+          "Test Fundraise Story Text",
+          "The image should be in the format of base64",
+          Math.floor(Date.now() / 1000) + 86400 // timestamp is in seconds
+          // set ddl 1 day after the creating time for testing
+        );
+  
+        const fundId = (await TrustableFundTestCase.getFundList())[0].length - 1;
+  
+        // Addr1 donates to the fundraise created by addr0, meeting the goal
+        const donationAmount = ethers.parseEther("100");
+        await TrustableFundTestCase.connect(addr1).donation(
+          fundId,
+          "2024-01-01T12:00:00Z",
+          { value: donationAmount }
+        );
+  
+  
+        // Check balances before failed cancelling
+        let addr1BalanceBefore = await ethers.provider.getBalance(addr1.address);
+        let addr0BalanceBefore = await ethers.provider.getBalance(addr0.address);
+        let contractBalanceBefore = await ethers.provider.getBalance(
+              TrustableFundTestCase.getAddress()
+        );
+        // Addr1 trys to cancel this fundraise but should fail
+        await expect(
+          TrustableFundTestCase.connect(addr1).cancelFundraise(
+            "Math.floor(Date.now() / 1000)"
+          )
+        ).to.be.reverted;
+  
+        // Check balances after cancelling (failed)
+        let addr1BalanceAfter = await ethers.provider.getBalance(addr1.address);
+        let addr0BalanceAfter = await ethers.provider.getBalance(addr0.address);
+        let contractBalanceAfter = await ethers.provider.getBalance(
+          TrustableFundTestCase.getAddress()
+        );
+  
+        // Check if the contract balance reamins unchanged before and after the failed cancel
+        expect(contractBalanceAfter).to.equal(contractBalanceBefore);
+        // Check if the add0 balance is less than before due to the gas price
+        expect(addr0BalanceAfter).to.equal(addr0BalanceBefore);
+       // Check if the add1 balance reamins unchanged before and after the failed cancel
+        expect(addr1BalanceAfter).to.lessThan(addr1BalanceBefore);
+  
+      });
 
     it("Should allow the fundraiser to cancel the fundraising project and return the funds from smart contract", async function () {
       let { TrustableFundTestCase, addr0, addr1, addr2 } = await loadFixture(
