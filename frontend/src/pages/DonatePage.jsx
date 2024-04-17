@@ -37,7 +37,7 @@ const DonatePage = () => {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const { library } = useWeb3React();
+  const { library, account } = useWeb3React();
 
   const address = "0x4AfEC11A9E24462E87cf33D8CB3C5f2B69018166";
 
@@ -52,7 +52,7 @@ const DonatePage = () => {
         library.getSigner()
       )
     );
-  }, [library]);
+  }, [library,account]);
 
   useEffect(() => {
     if (!contract) {

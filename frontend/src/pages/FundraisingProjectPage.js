@@ -23,7 +23,7 @@ import { useWeb3React } from "@web3-react/core";
 import { ethers } from "ethers";
 
 const FundraisingProjectPage = () => {
-  const { library } = useWeb3React();
+  const { library, account } = useWeb3React();
   const [fundRaiseList, setFundList] = useState([]);
   const [contract, setContract] = useState();
   const navigate = useNavigate();
@@ -62,7 +62,7 @@ const FundraisingProjectPage = () => {
     }
     _GetFundraiseList();
     setRefresh(false);
-  }, [contract, refresh]);
+  }, [contract, refresh, account]);
 
   const _GetFundraiseList = async () => {
     const fundRaiseList = await contract.getFundraiseByUser();
@@ -202,7 +202,7 @@ const FundraisingProjectPage = () => {
                 src={item.imageurl}
                 style={{
                   width: "100%",
-                  maxHeight: "250px",
+                  height: "250px",
                   objectFit: "cover",
                   my: "auto",
                 }}

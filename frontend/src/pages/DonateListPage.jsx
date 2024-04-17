@@ -20,15 +20,31 @@ import { ProgressBar } from "../component/Progress";
 import TrustableFundArtifact from "../contracts/TrustableFund.sol/TrustableFund.json";
 import { useWeb3React } from "@web3-react/core";
 import { ethers } from "ethers";
+import TablePagination from "@mui/material/TablePagination";
+
 
 const DonateListPage = () => {
   const { library } = useWeb3React();
   const [searchTerm, setSearchTerm] = useState("");
   const [fundList, setFundList] = useState([]);
+  const [filterList, setFilterList] = useState([]);
   const [contract, setContract] = useState();
   const navigate = useNavigate();
 
   const address = "0x4AfEC11A9E24462E87cf33D8CB3C5f2B69018166";
+
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(+event.target.value);
+    setPage(0);
+  };
+
 
   useEffect(() => {
     if (!library) {
@@ -88,8 +104,9 @@ const DonateListPage = () => {
       }
       return a.deadLine - b.deadLine;  // The one with the earliest deadline is placed first
     });
-
+    console.log(updateFundList);
     setFundList(updateFundList);
+    setFilterList(updateFundList);
   };
 
   const handleSearch = (event) => {
@@ -97,7 +114,7 @@ const DonateListPage = () => {
     const filteredItems = fundList.filter((item) =>
       item.storyTitle.toLowerCase().includes(event.target.value.toLowerCase())
     );
-    setFundList(filteredItems);
+    setFilterList(filteredItems);
   };
 
   const unixTimeToDate = (unixTime) => {
@@ -125,7 +142,9 @@ const DonateListPage = () => {
         style={{ marginBottom: "20px" }}
       />
       <List>
-        {fundList.map((item) => (
+        {filterList
+        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+        .map((item) => (
           <ListItem
             key={item.id}
             sx={{ height: "250px", alignItems: "center" }}
@@ -146,7 +165,7 @@ const DonateListPage = () => {
                 src={item.imageurl}
                 style={{
                   width: "100%",
-                  maxHeight: "200px",
+                  height: "200px",
                   objectFit: "cover",
                   my: "auto",
                 }}
@@ -212,6 +231,15 @@ const DonateListPage = () => {
           </ListItem>
         ))}
       </List>
+      <TablePagination
+        rowsPerPageOptions={[5,10,15]}
+        component="div"
+        count={fundList.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+      />
     </Container>
   );
 };
